@@ -5,6 +5,7 @@ import SplashScreen from '../screens/SplashScreen';
 import NamePage from '../screens/NamePage';
 import PrivacyPage from '../screens/PrivacyPage';
 import CaregiverPage from '../screens/CaregiverPage';
+import LoginCodeScreen from '../screens/LoginCode';
 
 export type RootStackParamList = {
   SplashScreen: undefined;
@@ -19,6 +20,7 @@ export type RootStackParamList = {
     phone: string; firstName: string; lastName?: string;
     caregiverFirstName?: string; caregiverLastName?: string; caregiverPhone?: string;
   };
+  LoginCode: { phone: string; firstName: string; lastName?: string };
 
   };
 
@@ -33,6 +35,7 @@ export default function RootNavigator() {
       <Stack.Screen name="Caregiver" component={CaregiverPage} /> 
       <Stack.Screen name="Protection" component={ProtectionScreen} />
       <Stack.Screen name="Privacy" component={PrivacyPage} />
+      <Stack.Screen name="LoginCode" component={LoginCodeScreen} />
     </Stack.Navigator>
   );
 }
