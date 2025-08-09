@@ -1,6 +1,10 @@
 import base64
 import json
+from typing import Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
+from app.core.config import settings
+from app.services.google_stt import GoogleSTTStreamer
 
 router = APIRouter(tags=["media"])
 
@@ -8,10 +12,9 @@ router = APIRouter(tags=["media"])
 async def media_ws(ws: WebSocket):
     """
     WebSocket endpoint for handling real-time media streams from Twilio.
-    
-    This endpoint receives audio data from Twilio's Media Streams API and
-    processes it for speech-to-text conversion. The audio comes in as
-    base64-encoded MULAW format at 8kHz sample rate.
+
+    Twilio sends base64-encoded G.711 MULAW audio at 8 kHz. We stream
+    the decoded bytes (raw MULAW) directly to Google STT with encoding=MULAW.
     """
     await ws.accept()
     
@@ -20,13 +23,19 @@ async def media_ws(ws: WebSocket):
     stream_sid = None
     frames = 0
 
+    stt: Optional[GoogleSTTStreamer] = None
+
     print("WS: client connected")
+
+    def on_transcript(text: str, is_final: bool) -> None:
+        tag = "FINAL" if is_final else "INTERIM"
+        print(f"STT[{tag}]: {text}")
 
     try:
         while True:
             # Receive raw JSON message from WebSocket
             raw = await ws.receive_text()
-            
+
             try:
                 msg = json.loads(raw)
             except json.JSONDecodeError as e:
@@ -43,10 +52,22 @@ async def media_ws(ws: WebSocket):
                 call_sid = start_data.get("callSid")
                 stream_sid = start_data.get("streamSid")
 
-                print(f"MEDIA START callSid = {call_sid}, streamSid = {stream_sid}")
+                print(f"MEDIA START callSid={call_sid}, streamSid={stream_sid}")
 
-                # TODO: Open google STT streaming session here (encoding = MULAW, rate = 8000)
-                # Note: Google STT expects LINEAR16 format, so MULAW needs conversion
+                # Initialize Google STT streaming session
+                try:
+                    stt = GoogleSTTStreamer(
+                        language_code=settings.STT_LANGUAGE_CODE,
+                        sample_rate_hz=8000,
+                        enable_interim_results=True,
+                        enable_automatic_punctuation=True,
+                        audio_encoding="MULAW",
+                    )
+                    stt.start(callback=on_transcript)
+                    print("STT: streaming session started (MULAW@8kHz)")
+                except Exception as e:
+                    print(f"STT: failed to start streaming session: {e}")
+                    stt = None
 
             elif event == "media":
                 # Handle incoming audio data
@@ -55,40 +76,53 @@ async def media_ws(ws: WebSocket):
                 # Extract base64-encoded audio payload
                 media_data = msg.get("media", {})
                 payload_b64 = media_data.get("payload")
-                
+
                 if not payload_b64:
                     print("WS: Received media event without payload")
                     continue
-                
+
                 try:
-                    # Decode base64 to get raw MULAW audio bytes
                     mulaw_bytes = base64.b64decode(payload_b64)
                 except Exception as e:
                     print(f"WS: Failed to decode base64 payload: {e}")
                     continue
 
-                # TODO: write mulaw_bytes into Google STT stream
-                # Note: Google STT requires LINEAR16 format, so MULAW needs conversion
-                # For now, just log every 50 frames (~1 second at 8kHz)
+                if stt is not None:
+                    try:
+                        stt.write(mulaw_bytes)
+                    except Exception as e:
+                        print(f"STT: failed to process audio chunk: {e}")
+
                 if frames % 50 == 0:
                     print(f"MEDIA frames received: {frames}")
-                
+
             elif event == "stop":
-                # Handle media stream stop event
-                print(f"MEDIA STOP callSid={call_sid}, streamSid = {stream_sid}")
-                # TODO: close Google STT streaming session + drain final results
+                print(f"MEDIA STOP callSid={call_sid}, streamSid={stream_sid}")
+                if stt is not None:
+                    try:
+                        stt.close()
+                        print("STT: streaming session closed")
+                    except Exception as e:
+                        print(f"STT: error while closing session: {e}")
+                    finally:
+                        stt = None
                 break
 
             else:
                 # Twilio may send 'mark' or other diagnostic events
                 # These are typically used for debugging and can be ignored
                 print(f"WS: Received unknown event type: {event}")
-        
+
     except WebSocketDisconnect:
         print("WS: Client disconnected")
     except Exception as e:
         print(f"WS: Unexpected error: {e}")
     finally:
-        # Clean up any resources when the connection ends
+        if stt is not None:
+            try:
+                stt.close()
+                print("STT: streaming session closed (finally)")
+            except Exception:
+                pass
         print(f"WS: Connection ended for callSid={call_sid}, streamSid={stream_sid}")
 
