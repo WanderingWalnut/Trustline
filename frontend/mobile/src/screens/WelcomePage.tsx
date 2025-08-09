@@ -1,290 +1,140 @@
-import React, { useState } from 'react';
+// src/screens/WelcomeScreen.tsx
+import * as React from 'react';
 import {
+  SafeAreaView,
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
-  TextInput,
-  TouchableOpacity,
-  Dimensions,
   Image,
+  TextInput,
+  Pressable,
 } from 'react-native';
+import colors from '../constants/color';
+import { sx, sy, fs } from '../utils/designScale';
 
-const { width } = Dimensions.get('window');
-
-const ShieldLogo = () => (
-  <Image
-    source={require('../../assets/logo.png')}   // Adjust path as needed
-    style={styles.logo}
-    resizeMode="contain"                      // Prevent stretching
-  />
-);
-
-// Header Icons Component
-const HeaderIcons = () => (
-  <View style={styles.headerIcons}>
-    <TouchableOpacity style={styles.iconButton}>
-      <View style={styles.profileIcon}>
-        <View style={styles.profileHead} />
-        <View style={styles.profileBody} />
-      </View>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.iconButton}>
-      <View style={styles.settingsIcon}>
-        <View style={styles.gear} />
-      </View>
-    </TouchableOpacity>
-  </View>
-);
+const PROFILE_ICON = require('../../assets/profile.png');
+const SETTINGS_ICON = require('../../assets/settings.png');
+const LOGO = require('../../assets/logo.png');
+const CANADA_FLAG = require('../../assets/flag.png');
 
 export default function WelcomeScreen() {
-  const [phoneNumber, setPhoneNumber] = useState('');
-
-  const handleContinue = () => {
-    console.log('Continue pressed with phone:', phoneNumber);
-    // Navigation logic will be added later
-  };
+  const [phoneNumber, setPhoneNumber] = React.useState('');
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.root}>
       <View style={styles.content}>
-        {/* Header with icons */}
-        <HeaderIcons />
-
-        {/* Logo and App Info */}
-        <View style={styles.logoSection}>
-          <ShieldLogo />
-          <View style={styles.appInfo}>
-            <Text style={styles.appName}>Trustline</Text>
-            <Text style={styles.appDescription}>Scam call protection</Text>
-          </View>
-        </View>
-
-        {/* Welcome Title */}
-        <Text style={styles.welcomeTitle}>Welcome</Text>
-
-        {/* Phone Number Section */}
-        <View style={styles.phoneSection}>
-          <Text style={styles.phonePrompt}>Add your phone number</Text>
-          <Text style={styles.phoneDescription}>
-            This will help detect and{'\n'}prevent scam callers.
-          </Text>
-
-          {/* Phone Input */}
-          <View style={styles.phoneInputContainer}>
-            <View style={styles.countryCode}>
-              <View style={styles.canadaFlag}>
-                <View style={styles.flagRed} />
-                <View style={styles.flagWhite} />
-                <View style={styles.flagRed} />
-              </View>
-              <Text style={styles.countryCodeText}>+1</Text>
+        {/* Header */}
+        <View style={[styles.headerRow, { marginTop: sy(36) }]}>
+          <View style={styles.brandRow}>
+            <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+            <View>
+              <Text style={styles.brand}>Trustline</Text>
+              <Text style={styles.subtitle}>Scam call protection</Text>
             </View>
-            <TextInput
-              style={styles.phoneInput}
-              placeholder="Phone Number"
-              placeholderTextColor="#999"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-            />
           </View>
 
-          {/* Continue Button */}
-          <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-            <Text style={styles.continueButtonText}>Continue</Text>
-          </TouchableOpacity>
+          <View style={styles.iconsRow}>
+            <Image source={PROFILE_ICON} style={styles.icon} />
+            <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(20) }]} />
+          </View>
         </View>
+
+        {/* Welcome Text */}
+        <Text style={[styles.welcome, { marginTop: sy(80) }]}>Welcome</Text>
+        <Text style={styles.phonePrompt}>Add your phone number</Text>
+        <Text style={styles.phoneDescription}>send notifications</Text>
+
+        {/* Phone Input */}
+        <View style={[styles.phoneInputContainer, { marginTop: sy(40) }]}>
+          <Image source={CANADA_FLAG} style={styles.flag} />
+          <Text style={styles.countryCode}>+1</Text>
+          <TextInput
+            style={styles.phoneInput}
+            placeholder="Phone Number"
+            placeholderTextColor="#999"
+            keyboardType="phone-pad"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+          />
+        </View>
+
+        <View style={{ height: sy(120) }} />
+
+        {/* Continue Button */}
+        <Pressable style={styles.continueButton} onPress={() => console.log(phoneNumber)}>
+          <Text style={styles.continueButtonText}>Continue</Text>
+        </Pressable>
+
+        <View style={{ height: sy(60) }} />
       </View>
     </SafeAreaView>
   );
 }
 
+const INPUT_HEIGHT = sy(48);
+
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F2F2F2',
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingHorizontal: sx(20),
   },
-  logo: {
-    width: 40,     // adjust size as needed
-    height: 40,
-  },
-  
-  // Header Icons
-  headerIcons: {
+
+  // Header
+  headerRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginBottom: 40,
-    gap: 16,
+    justifyContent: 'space-between',
+    // alignItems: 'center',  // moved inline to fix icons alignment
   },
-  iconButton: {
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileIcon: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-  },
-  profileHead: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#000',
-    marginBottom: 1,
-  },
-  profileBody: {
-    width: 10,
-    height: 8,
-    backgroundColor: '#000',
-    borderTopLeftRadius: 5,
-    borderTopRightRadius: 5,
-  },
-  settingsIcon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#000',
-    position: 'relative',
-  },
-  gear: {
-    position: 'absolute',
-    top: 6,
-    left: 6,
-    width: 4,
-    height: 4,
-    backgroundColor: '#000',
-    borderRadius: 2,
-  },
-
-  // Logo Section
-  logoSection: {
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: sx(10) },
+  logo: { width: sx(50), height: sx(50) },
+  brand: { fontSize: fs(18), fontWeight: '700', color: '#0A0A0A' },
+  subtitle: { marginTop: sy(4), fontSize: fs(16), color: '#1B2CC1', fontWeight: '500' },
+  iconsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 60,
+    alignItems: 'center',  // vertically center icons
   },
-  shield: {
-    width: 48,
-    height: 56,
-    backgroundColor: '#1E40FF',
-    borderRadius: 8,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  shieldText: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  appInfo: {
-    flex: 1,
-  },
-  appName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 2,
-  },
-  appDescription: {
-    fontSize: 16,
-    color: '#1E40FF',
-    fontWeight: '500',
-  },
+  icon: { width: sx(20), height: sx(20), resizeMode: 'contain' },
 
-  // Welcome Title
-  welcomeTitle: {
-    fontSize: 36,
-    fontWeight: '300',
-    color: '#000',
-    marginBottom: 80,
-  },
+  // Welcome text
+  welcome: { fontSize: fs(28), fontWeight: '400', color: '#0A0A0A', textAlign: 'center' },
+  phonePrompt: { fontSize: fs(18), color: '#1B2CC1', textAlign: 'center', marginTop: sy(10) },
+  phoneDescription: { fontSize: fs(16), color: '#000', textAlign: 'center', marginTop: sy(4) },
 
-  // Phone Section
-  phoneSection: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  phonePrompt: {
-    fontSize: 18,
-    color: '#1E40FF',
-    fontWeight: '500',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  phoneDescription: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 40,
-  },
-
-  // Phone Input
+  // Phone input
   phoneInputContainer: {
     flexDirection: 'row',
-    backgroundColor: '#E8E8E8',
-    borderRadius: 25,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
     alignItems: 'center',
-    width: width - 48,
-    marginBottom: 40,
+    backgroundColor: '#DADADA',
+    borderRadius: INPUT_HEIGHT / 2,
+    height: INPUT_HEIGHT,
+    paddingHorizontal: sx(12),
   },
-  countryCode: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 12,
+  flag: {
+    width: sx(28),
+    height: sy(20),
+    marginRight: sx(8),
+    borderRadius: 3,
+    resizeMode: 'cover',
   },
-  canadaFlag: {
-    width: 20,
-    height: 14,
-    flexDirection: 'row',
-    borderRadius: 2,
-    overflow: 'hidden',
-    marginRight: 8,
-  },
-  flagRed: {
-    flex: 1,
-    backgroundColor: '#FF0000',
-  },
-  flagWhite: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  countryCodeText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
-  },
+  countryCode: { fontSize: fs(16), color: '#000', marginRight: sx(8) },
   phoneInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: fs(16),
     color: '#000',
-    paddingVertical: 4,
+    paddingVertical: 0,
   },
 
-  // Continue Button
+  // Continue button
   continueButton: {
+    alignSelf: 'center',
     backgroundColor: '#D0D0D0',
-    paddingHorizontal: 40,
-    paddingVertical: 16,
-    borderRadius: 25,
+    paddingHorizontal: sx(40),
+    paddingVertical: sy(12),
+    borderRadius: sx(25),
   },
-  continueButtonText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
-  },
+  continueButtonText: { fontSize: fs(16), color: '#000' },
 });
