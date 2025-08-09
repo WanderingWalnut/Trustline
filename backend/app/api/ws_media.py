@@ -26,10 +26,21 @@ async def media_ws(ws: WebSocket):
     stt: Optional[GoogleSTTStreamer] = None
 
     print("WS: client connected")
+    
+    last_interim = ""
 
     def on_transcript(text: str, is_final: bool) -> None:
-        tag = "FINAL" if is_final else "INTERIM"
-        print(f"STT[{tag}]: {text}")
+        nonlocal last_interim
+        t = text.strip()
+        if is_final:
+            print(f"STT[FINAL]: {t}")
+            last_interim = "" # Reset between utterances
+        
+        else:
+            # If it's not the same text then print it
+            if t and t != last_interim:
+                print(f"STT[INTERIM]: {t}")
+                last_interim = t
 
     try:
         while True:

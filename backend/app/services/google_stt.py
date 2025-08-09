@@ -97,21 +97,16 @@ class GoogleSTTStreamer:
                 continue
             yield speech.StreamingRecognizeRequest(audio_content=chunk)
 
+
     def _response_loop(self):
         """Read streaming responses and invoke the transcript callback.
         Runs in a background daemon thread so writes do not block reads.
         """
         try:
-            # First try the "requests only" signature where the config is in the first request
-            try:
-                iterator = self._client.streaming_recognize(requests=self._requests_with_config())
-            except TypeError:
-                # Fallback for versions that require config as a separate parameter
-                iterator = self._client.streaming_recognize(
-                    config=self._streaming_config,
-                    requests=self._audio_only_requests(),
-                )
-
+            iterator = self._client.streaming_recognize(
+                config=self._streaming_config,
+                requests=self._audio_only_requests(),
+            )
             for response in iterator:
                 if self._callback is None:
                     continue
