@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,75 +9,85 @@ import {
   Dimensions,
   Image,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigations/RootNavigator';
 
 const { width } = Dimensions.get('window');
 
-const ShieldLogo = () => (
-  <Image
-    source={require('../../assets/logo.png')}   // Adjust path as needed
-    style={styles.logo}
-    resizeMode="contain"                      // Prevent stretching
-  />
-);
+// Adjust logo size proportionally to screen width
+const LOGO_W = Math.round(width * 0.14);
 
-// Header Icons Component
-const HeaderIcons = () => (
-  <View style={styles.headerIcons}>
-    <TouchableOpacity style={styles.iconButton}>
-      <View style={styles.profileIcon}>
-        <View style={styles.profileHead} />
-        <View style={styles.profileBody} />
-      </View>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.iconButton}>
-      <View style={styles.settingsIcon}>
-        <View style={styles.gear} />
-      </View>
-    </TouchableOpacity>
-  </View>
-);
+type Nav = NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
 
-export default function WelcomeScreen() {
+export default function WelcomePage() {
   const [phoneNumber, setPhoneNumber] = useState('');
+  const navigation = useNavigation<Nav>();
+
+  // Auto-redirect after 3 seconds
+  useEffect(() => {
+    const t = setTimeout(() => {
+      navigation.replace('Protection'); // replace prevents going back to Welcome
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [navigation]);
 
   const handleContinue = () => {
-    console.log('Continue pressed with phone:', phoneNumber);
-    // Navigation logic will be added later
+    navigation.navigate('Protection');
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {/* Header with icons */}
-        <HeaderIcons />
+        {/* Top row: Brand on left, icons on right */}
+        <View style={styles.topRow}>
+          <View style={styles.brandRow}>
+            <Image
+              source={require('../../assets/logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <View>
+              <Text style={styles.appName}>Trustline</Text>
+              <Text style={styles.appDescription}>Scam call protection</Text>
+            </View>
+          </View>
 
-        {/* Logo and App Info */}
-        <View style={styles.logoSection}>
-          <ShieldLogo />
-          <View style={styles.appInfo}>
-            <Text style={styles.appName}>Trustline</Text>
-            <Text style={styles.appDescription}>Scam call protection</Text>
+          <View style={styles.iconRow}>
+            <TouchableOpacity style={styles.iconBtn}>
+              <Image
+                source={require('../../assets/profile.png')}
+                style={styles.iconImg}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconBtn}>
+              <Image
+                source={require('../../assets/settings.png')}
+                style={styles.iconImg}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
-        {/* Welcome Title */}
+        {/* Welcome */}
         <Text style={styles.welcomeTitle}>Welcome</Text>
 
-        {/* Phone Number Section */}
+        {/* Phone number section */}
         <View style={styles.phoneSection}>
           <Text style={styles.phonePrompt}>Add your phone number</Text>
           <Text style={styles.phoneDescription}>
             This will help detect and{'\n'}prevent scam callers.
           </Text>
 
-          {/* Phone Input */}
           <View style={styles.phoneInputContainer}>
             <View style={styles.countryCode}>
-              <View style={styles.canadaFlag}>
-                <View style={styles.flagRed} />
-                <View style={styles.flagWhite} />
-                <View style={styles.flagRed} />
-              </View>
+              <Image
+                source={require('../../assets/canada.png')} // replace with your flag asset
+                style={styles.flagImg}
+                resizeMode="cover"
+              />
               <Text style={styles.countryCodeText}>+1</Text>
             </View>
             <TextInput
@@ -90,7 +100,6 @@ export default function WelcomeScreen() {
             />
           </View>
 
-          {/* Continue Button */}
           <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
             <Text style={styles.continueButtonText}>Continue</Text>
           </TouchableOpacity>
@@ -101,99 +110,28 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
+  container: { flex: 1, backgroundColor: '#F5F5F5' },
+  content: { flex: 1, paddingHorizontal: 24, paddingTop: 12 },
+
+  // Header
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 28,
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 20,
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   logo: {
-    width: 40,     // adjust size as needed
-    height: 40,
-  },
-  
-  // Header Icons
-  headerIcons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginBottom: 40,
-    gap: 16,
-  },
-  iconButton: {
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileIcon: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-  },
-  profileHead: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#000',
-    marginBottom: 1,
-  },
-  profileBody: {
-    width: 10,
-    height: 8,
-    backgroundColor: '#000',
-    borderTopLeftRadius: 5,
-    borderTopRightRadius: 5,
-  },
-  settingsIcon: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#000',
-    position: 'relative',
-  },
-  gear: {
-    position: 'absolute',
-    top: 6,
-    left: 6,
-    width: 4,
-    height: 4,
-    backgroundColor: '#000',
-    borderRadius: 2,
-  },
-
-  // Logo Section
-  logoSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 60,
-  },
-  shield: {
-    width: 48,
-    height: 56,
-    backgroundColor: '#1E40FF',
-    borderRadius: 8,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  shieldText: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  appInfo: {
-    flex: 1,
+    width: LOGO_W,
+    height: LOGO_W,
   },
   appName: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#000',
     marginBottom: 2,
   },
@@ -202,25 +140,26 @@ const styles = StyleSheet.create({
     color: '#1E40FF',
     fontWeight: '500',
   },
+  iconRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  iconBtn: { width: 28, height: 28, justifyContent: 'center', alignItems: 'center' },
+  iconImg: { width: 22, height: 22 },
 
-  // Welcome Title
+  // Title
   welcomeTitle: {
     fontSize: 36,
     fontWeight: '300',
     color: '#000',
-    marginBottom: 80,
+    marginTop: 8,
+    marginBottom: 64,
   },
 
-  // Phone Section
-  phoneSection: {
-    alignItems: 'center',
-    flex: 1,
-  },
+  // Phone section
+  phoneSection: { alignItems: 'center', flex: 1 },
   phonePrompt: {
     fontSize: 18,
     color: '#1E40FF',
-    fontWeight: '500',
-    marginBottom: 16,
+    fontWeight: '600',
+    marginBottom: 10,
     textAlign: 'center',
   },
   phoneDescription: {
@@ -228,63 +167,28 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 40,
+    marginBottom: 28,
   },
-
-  // Phone Input
   phoneInputContainer: {
     flexDirection: 'row',
     backgroundColor: '#E8E8E8',
-    borderRadius: 25,
-    paddingHorizontal: 16,
+    borderRadius: 26,
+    paddingHorizontal: 14,
     paddingVertical: 12,
     alignItems: 'center',
     width: width - 48,
-    marginBottom: 40,
+    marginBottom: 28,
   },
-  countryCode: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  canadaFlag: {
-    width: 20,
-    height: 14,
-    flexDirection: 'row',
-    borderRadius: 2,
-    overflow: 'hidden',
-    marginRight: 8,
-  },
-  flagRed: {
-    flex: 1,
-    backgroundColor: '#FF0000',
-  },
-  flagWhite: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  countryCodeText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
-  },
-  phoneInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#000',
-    paddingVertical: 4,
-  },
+  countryCode: { flexDirection: 'row', alignItems: 'center', marginRight: 10, gap: 8 },
+  flagImg: { width: 22, height: 16, borderRadius: 3, overflow: 'hidden' },
+  countryCodeText: { fontSize: 16, color: '#666', fontWeight: '600' },
+  phoneInput: { flex: 1, fontSize: 16, color: '#000', paddingVertical: 4 },
 
-  // Continue Button
   continueButton: {
     backgroundColor: '#D0D0D0',
     paddingHorizontal: 40,
     paddingVertical: 16,
     borderRadius: 25,
   },
-  continueButtonText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
-  },
+  continueButtonText: { fontSize: 16, color: '#666', fontWeight: '600' },
 });
