@@ -104,3 +104,17 @@ celerybeat.pid
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Google Cloud credentials and service accounts
+# Service account keys and credentials
+*-service-account*.json
+*service-account*.json
+*credentials*.json
+*key*.json
+natiginite-*.json
+*.pem
+*.p12
+*.key
+
+# Specific service account files
+natiginite-468502-a939ca6ad8e1.json
