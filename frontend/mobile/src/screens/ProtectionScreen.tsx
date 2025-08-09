@@ -57,7 +57,7 @@ export default function ProtectionScreen() {
             style={({ pressed }) => [
               styles.powerBtn,
               {
-                backgroundColor: on ? colors?.onOrange ?? '#E67E22' : colors?.offBlue ?? '#1E3A8A',
+                backgroundColor: on ? '#1E3A8A'  : '#8F8E8E',
                 opacity: pressed ? 0.92 : 1,
               },
             ]}
