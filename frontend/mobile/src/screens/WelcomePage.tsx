@@ -1,5 +1,7 @@
 // src/screens/WelcomeScreen.tsx
 import * as React from 'react';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   SafeAreaView,
   View,
@@ -24,13 +26,30 @@ const CANADA_FLAG = require('../../assets/flag.png');
 
 const ACCESSORY_ID = 'phoneDone';
 
+// keep this in sync with RootNavigator
+type RootStackParamList = {
+  SplashScreen: undefined;
+  Welcome: undefined;
+  Name: undefined;
+  Protection: undefined;
+};
+
 export default function WelcomeScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Welcome'>>();
   const [phoneNumber, setPhoneNumber] = React.useState('');
   const inputRef = React.useRef<TextInput>(null);
 
   const dismiss = () => {
     inputRef.current?.blur();
     Keyboard.dismiss();
+  };
+
+  const goNext = () => {
+    dismiss();
+    // optional validation:
+    // if (phoneNumber.trim().length < 10) return alert('Enter a valid phone number');
+    navigation.navigate('Name');             // 👈 go to NamePage
+    // or pass data: navigation.navigate('Name', { phone: `+1${phoneNumber}` });
   };
 
   return (
@@ -90,7 +109,7 @@ export default function WelcomeScreen() {
             <View style={{ height: sy(120) }} />
 
             {/* Continue Button */}
-            <Pressable style={styles.continueButton} onPress={dismiss}>
+            <Pressable style={styles.continueButton} onPress={goNext}>
               <Text style={styles.continueButtonText}>Continue</Text>
             </Pressable>
 
