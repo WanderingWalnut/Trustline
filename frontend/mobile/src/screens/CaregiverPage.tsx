@@ -69,10 +69,6 @@ export default function CaregiverPage() {
                   <Text style={styles.subtitle}>Scam call protection</Text>
                 </View>
               </View>
-              <View style={styles.iconsRow}>
-                <Image source={PROFILE_ICON} style={styles.icon} />
-                <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(20) }]} />
-              </View>
             </View>
 
             {/* Title */}
