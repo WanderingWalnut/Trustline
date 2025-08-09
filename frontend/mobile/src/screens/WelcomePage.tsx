@@ -37,8 +37,8 @@ export default function WelcomeScreen() {
     Keyboard.dismiss();
   };
 
-  // CHANGES: normalize, validate, then navigate with params
-  const goNext = () => {
+  // Supabase Auth OTP flow
+  const goNext = async () => {
     dismiss();
     const digits = phoneNumber.replace(/\D/g, ''); // keep only 0-9
     if (digits.length !== 10) {
@@ -46,7 +46,23 @@ export default function WelcomeScreen() {
       return;
     }
     const phone = `+1${digits}`; // E.164 style for Canada/US
-    navigation.navigate('Name', { phone });
+
+    // Supabase OTP
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      // You may want to move this to a separate file for reuse
+      const supabase = createClient('https://gkhyhlhiwhujqnpotqvo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdraHlobGhpd2h1anFucG90cXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTk2MDIsImV4cCI6MjA3MDI3NTYwMn0.Vgxohdq_Qj2OmOpb0dB-7xFelqIBHppb330POKBdjSc');
+      const { error } = await supabase.auth.signInWithOtp({ phone });
+      if (error) {
+        alert(error.message);
+        return;
+      }
+      // Navigate to OTP entry screen (replace 'Name' with your OTP screen)
+      navigation.navigate('Name', { phone });
+    } catch (err) {
+      alert('Failed to send OTP');
+      console.error(err);
+    }
   };
 
   return (
