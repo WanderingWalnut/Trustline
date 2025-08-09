@@ -1,0 +1,39 @@
+# FastAPI and ASGI server
+fastapi
+uvicorn[standard]
+
+# Database
+sqlalchemy
+alembic
+
+# Environment and configuration
+python-dotenv
+pydantic
+pydantic-settings
+
+# Twilio integration
+twilio
+
+# WebSocket support
+websockets
+
+# HTTP client
+httpx
+
+# Security and authentication
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+
+# Logging and monitoring
+structlog
+
+# Testing
+pytest
+pytest-asyncio
+
+# Development tools
+black
+isort
+flake8
+mypy
