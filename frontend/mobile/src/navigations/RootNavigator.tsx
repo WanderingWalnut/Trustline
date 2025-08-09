@@ -11,6 +11,9 @@ import ProtectionScreen from '../screens/ProtectionScreen';
 import LoginCodeScreen from '../screens/LoginCode';
 import SettingsScreen from '../screens/Settings';
 import ProfileScreen from '../screens/Profile';
+import HelpCentre from '../screens/HelpCentre';
+import Statement from '../screens/Statement';
+import ReportPage from '../screens/ReportPage';
 
 export type RootStackParamList = {
   SplashScreen: undefined;
@@ -28,13 +31,16 @@ export type RootStackParamList = {
   LoginCode: { phone: string; firstName: string; lastName?: string };
   Settings: undefined;
   Profile: undefined;
+  HelpCenter: undefined;
+  Statement: undefined;
+  ReportPage: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="SplashScreen">
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="ReportPage">
       <Stack.Screen name="SplashScreen" component={SplashScreen} />
       <Stack.Screen name="Welcome" component={WelcomePage} />
       <Stack.Screen name="Name" component={NamePage} />
@@ -44,6 +50,9 @@ export default function RootNavigator() {
       <Stack.Screen name="Protection" component={ProtectionScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="HelpCenter" component={HelpCentre} />
+      <Stack.Screen name="Statement" component={Statement} />
+      <Stack.Screen name="ReportPage" component={ReportPage} />
     </Stack.Navigator>
   );
 }
