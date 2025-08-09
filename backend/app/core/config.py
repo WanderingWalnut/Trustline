@@ -22,6 +22,12 @@ class Settings:
     
     # Detection Service Control
     DETECTION_ENABLED: bool = os.getenv("DETECTION_ENABLED", "false").lower() == "true"
+
+    # Reality Defender
+    REALITY_DEFENDER_API_KEY: str = os.getenv("REALITY_DEFENDER_API_KEY", "")
+
+    # Directory for saved audio files
+    CAPTURE_DIR: str = os.getenv("CAPTURE_DIR", "/tmp")
     
     @classmethod
     def validate_twilio_config(cls) -> bool:

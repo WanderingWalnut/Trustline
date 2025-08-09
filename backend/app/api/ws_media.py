@@ -1,12 +1,24 @@
+import asyncio
+import wave
+import os
+import time
 import base64
 import json
 from typing import Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from app.services.reality_defender import RealityDefenderService
 
 from app.core.config import settings
 from app.services.google_stt import GoogleSTTStreamer
 
 router = APIRouter(tags=["media"])
+
+_BIAS = 0x84
+_CLIP = 32635
+_EXP_LUT = [0, 132, 396, 924, 1980, 4092, 8316, 16764]
+capture_buf: Optional[bytearray] = None
+CAPTURE_TARGET_BYTES = 8000 * 10  # 10s of MULAW at 8kHz, mono
+captured = False
 
 @router.websocket("/media")
 async def media_ws(ws: WebSocket):
@@ -28,6 +40,55 @@ async def media_ws(ws: WebSocket):
     print("WS: client connected")
     
     last_interim = ""
+
+    def mulaw_to_linear16(mulaw_bytes: bytes) -> bytes:
+        out = bytearray(len(mulaw_bytes)*2)
+        j = 0 
+
+        for b in mulaw_bytes:
+            mu = (~b) & 0xFF
+            sign = mu & 0x80
+            exponent = (mu >> 4) & 0x07
+            mantissa = mu & 0x0F
+            magnitude = _EXP_LUT[exponent] + (mantissa << (exponent + 3))
+            
+            if magnitude > _CLIP:
+                magnitude = _CLIP
+            
+            sample = magnitude - _BIAS
+
+            if sign:
+                sample = -sample
+            
+            out[j] = sample & 0xFF
+            out[j+1] = (sample >> 8) & 0xFF
+            j += 2
+        
+        return bytes(out)
+    
+    async def save_and_submit_wav(call_sid: str, mulaw_bytes: bytes) -> None:
+        # Convert to PCM 16
+        pcm = mulaw_to_linear16(mulaw_bytes)
+
+        # Write WAV (mono, 8khz, 16-bit)
+        ts = int(time.time()) # timestamp
+        out_dir = settings.CAPTURE_DIR
+        os.makedirs(out_dir, exist_ok=True) # Make sure the directory exists
+        fname = f"call_{call_sid or 'unknown'}_{ts}.wav"
+        path = os.path.join(out_dir, fname)
+
+        with wave.open(path, "wb") as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(8000)
+            wf.writeframes(pcm)
+        
+        print(f"WAV written: {path}")
+
+        # Submit to reality defender (non-block here, but we await once)
+        svc = RealityDefenderService()
+        result = await svc.analyze_file(path)
+        print("Reality Defender:", {"status": result.get("status"), "score": result.get("score")})
 
     def on_transcript(text: str, is_final: bool) -> None:
         nonlocal last_interim
@@ -57,6 +118,11 @@ async def media_ws(ws: WebSocket):
             event = msg.get("event")
 
             if event == "start":
+
+                # Vars for reality defender check
+                capture_buf = bytearray()
+                captured = False
+
                 # Handle media stream start event
                 # This event contains metadata about the call and stream
                 start_data = msg.get("start", {})
@@ -106,9 +172,20 @@ async def media_ws(ws: WebSocket):
 
                 if frames % 50 == 0:
                     print(f"MEDIA frames received: {frames}")
+                
+                if capture_buf is not None and not captured:
+                    capture_buf.extend(mulaw_bytes)
+                    if len(capture_buf) >= CAPTURE_TARGET_BYTES:
+                        captured = True
+                        # Run save + submit in background so we don't block streaming
+                        asyncio.create_task(save_and_submit_wav(call_sid or "", bytes(capture_buf)))
 
             elif event == "stop":
                 print(f"MEDIA STOP callSid={call_sid}, streamSid={stream_sid}")
+                
+                if capture_buf and not captured and len(capture_buf) > 0:  # If ended under 10s, grab whatever is there and process
+                    asyncio.create_task(save_and_submit_wav(call_sid or "", bytes(capture_buf)))
+
                 if stt is not None:
                     try:
                         stt.close()

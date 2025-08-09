@@ -40,3 +40,6 @@ mypy
 
 # Google cloud-speech
 google-cloud-speech
+
+# Reality Defender
+realitydefender
