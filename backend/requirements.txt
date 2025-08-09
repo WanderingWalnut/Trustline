@@ -37,3 +37,6 @@ black
 isort
 flake8
 mypy
+
+# Google cloud-speech
+google-cloud-speech
