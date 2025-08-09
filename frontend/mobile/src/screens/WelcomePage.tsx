@@ -63,9 +63,6 @@ export default function WelcomeScreen() {
                   <Text style={styles.subtitle}>Scam call protection</Text>
                 </View>
               </View>
-              <View style={styles.iconsRow}>
-                <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(20) }]} />
-              </View>
             </View>
 
             {/* Welcome Text */}
