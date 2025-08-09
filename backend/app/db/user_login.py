@@ -6,17 +6,17 @@ def sign_up(ph_number: str, care_giver_number=None)->bool:
     Returns a boolean confirming whether or not signing up was successful.
     '''
 
+    '''
+    Since Vonage API (SMS provider) is a paid service, we cannot send an SMS to a number without 
+    first registering it as a test number (Galvin can register these numbers). We also have a 
+    limited number of free SMS messages to send.
+    '''
+
     response = supabase.auth.sign_in_with_otp( # If the user doesn't exist, sign_in_with_otp() will signup the user instead.
         {"phone": ph_number}
     )
-    print(f"response is: {response}")
-    print(f"OTP sent to: {ph_number}")
-
-    # At first the API call was actually signing user up but not sending OTP despite setting up SMS provider for Supabase db.
-    # Now, neither is working, I think it has something to do with the sender ID. 
-    # TODO: 
-    # - fix this bug. Maybe switching SMS provider might fix it.
-    # - Review the documentation about this: https://supabase.com/docs/reference/python/auth-signinwithotp
+    # print(f"response is: {response}")
+    # print(f"OTP sent to: {ph_number}")
 
     otp_code = input("Enter the code you received: ") 
 
@@ -28,16 +28,15 @@ def sign_up(ph_number: str, care_giver_number=None)->bool:
         }
     ) 
 
-
     print(verify_otp_response)
-    
+
     if verify_otp_response:
         return True
     else:
         return False
 
 def main():
-    phone_number = "<phone-number" # change this to a valid number
+    phone_number = "<phone-number>" # change this to a valid number
     sign_up(phone_number)
 
 main()
