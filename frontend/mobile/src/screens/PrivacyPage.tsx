@@ -1,6 +1,19 @@
 // src/screens/PrivacyScreen.tsx
 import * as React from 'react';
-import { SafeAreaView, View, Text, StyleSheet, Image, Pressable, Alert } from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Pressable,
+  Alert,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -27,14 +40,20 @@ export default function PrivacyScreen() {
   // If someone opens Privacy directly, bounce them to Welcome
   React.useEffect(() => {
     if (!params?.phone || !params?.firstName) {
-      // optional: Alert.alert('Let’s start at the beginning');
       navigation.replace('Welcome');
     }
   }, [params, navigation]);
 
+  const dismiss = () => Keyboard.dismiss();
+
   const onContinue = () => {
+    dismiss();
     // TODO: persist params (AsyncStorage / Context) if you want to use later
-    navigation.replace('Protection'); // enter the app; no back to Privacy
+    navigation.replace('Protection', {
+      phone: phone,
+      firstName: firstName,
+      lastName: params?.lastName,
+    }); // enter the app; no back to Privacy
   };
 
   const firstName = params?.firstName ?? '';
@@ -43,94 +62,102 @@ export default function PrivacyScreen() {
 
   return (
     <SafeAreaView style={styles.root}>
-      <View style={styles.content}>
-        {/* Header */}
-        <View style={[styles.headerRow, { marginTop: sy(36) }]}>
-          <View style={styles.brandRow}>
-            <Image source={LOGO} style={styles.logo} resizeMode="contain" />
-            <View>
-              <Text style={styles.brand}>Trustline</Text>
-              <Text style={styles.subtitle}>Scam call protection</Text>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <TouchableWithoutFeedback onPress={dismiss}>
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+            {/* Header */}
+            <View style={[styles.headerRow, { marginTop: sy(36) }]}>
+              <View style={styles.brandRow}>
+                <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+                <View>
+                  <Text style={styles.brand}>Trustline</Text>
+                  <Text style={styles.subtitle}>Scam call protection</Text>
+                </View>
+              </View>
+              <View style={styles.iconsRow}>
+                <Image source={PROFILE_ICON} style={styles.icon} />
+                <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(12) }]} />
+              </View>
             </View>
-          </View>
-          <View style={styles.iconsRow}>
-            <Image source={PROFILE_ICON} style={styles.icon} />
-            <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(12) }]} />
-          </View>
-        </View>
 
-        {/* Title */}
-        <Text style={[styles.title, { marginTop: sy(40) }]}>Privacy</Text>
-        <Text style={styles.privacySubtitle}>We care about your privacy</Text>
+            {/* Title */}
+            <Text style={[styles.title, { marginTop: sy(40) }]}>Privacy</Text>
+            <Text style={styles.privacySubtitle}>We care about your privacy</Text>
 
-        {/* Personalize safely */}
-        <Text style={{ textAlign: 'left', marginTop: sy(8), color: '#444', fontSize: fs(14) }}>
-          {firstName
-            ? `Hi ${firstName}${lastName}! We’ll use ${phone} to notify you about suspected scam calls.`
-            : 'Review and accept to continue.'}
-        </Text>
+            {/* Personalize safely */}
+            <Text style={{ textAlign: 'left', marginTop: sy(8), color: '#444', fontSize: fs(14) }}>
+              {firstName
+                ? `Hi ${firstName}${lastName}! We’ll use ${phone} to notify you about suspected scam calls.`
+                : 'Review and accept to continue.'}
+            </Text>
 
-        {/* Features */}
-        <View style={[styles.featuresContainer, { marginTop: sy(24) }]}>
-          <View style={styles.featureRow}>
-            <View style={[styles.iconContainer, { backgroundColor: '#1E3A8A' }]}>
-              <Image source={PHONE_ICON} style={styles.featureIcon} />
+            {/* Features */}
+            <View style={[styles.featuresContainer, { marginTop: sy(24) }]}>
+              <View style={styles.featureRow}>
+                <View style={[styles.iconContainer, { backgroundColor: '#1E3A8A' }]}>
+                  <Image source={PHONE_ICON} style={styles.featureIcon} />
+                </View>
+                <View style={styles.featureTextContainer}>
+                  <Text style={styles.featureText}>Your phone number remains</Text>
+                  <Text style={styles.featureText}>private</Text>
+                </View>
+              </View>
+
+              <View style={styles.featureRow}>
+                <View style={[styles.iconContainer, { backgroundColor: '#1E3A8A' }]}>
+                  <Image source={CHART_ICON} style={styles.featureIcon} />
+                </View>
+                <View style={styles.featureTextContainer}>
+                  <Text style={styles.featureText}>Data is collected to provide a</Text>
+                  <Text style={styles.featureText}>personal experience</Text>
+                </View>
+              </View>
+
+              <View style={styles.featureRow}>
+                <View style={[styles.iconContainer, { backgroundColor: '#1E3A8A' }]}>
+                  <Image source={PEOPLE_ICON} style={styles.featureIcon} />
+                </View>
+                <View style={styles.featureTextContainer}>
+                  <Text style={styles.featureText}>Your information is never</Text>
+                  <Text style={styles.featureText}>sold or shared with third</Text>
+                  <Text style={styles.featureText}>parties without your consent</Text>
+                </View>
+              </View>
+
+              <View style={styles.featureRow}>
+                <View style={[styles.iconContainer, { backgroundColor: '#6B7280' }]}>
+                  <Image source={SHIELD_ICON} style={styles.featureIcon} />
+                </View>
+                <View style={styles.featureTextContainer}>
+                  <Text style={styles.featureText}>By clicking continue, you</Text>
+                  <Text style={styles.featureText}>
+                    agree to the <Text style={styles.linkText}>Privacy Policy</Text>
+                  </Text>
+                  <Text style={styles.featureText}>
+                    and <Text style={styles.linkText}>Terms of Service</Text>
+                  </Text>
+                </View>
+              </View>
             </View>
-            <View style={styles.featureTextContainer}>
-              <Text style={styles.featureText}>Your phone number remains</Text>
-              <Text style={styles.featureText}>private</Text>
-            </View>
-          </View>
 
-          <View style={styles.featureRow}>
-            <View style={[styles.iconContainer, { backgroundColor: '#1E3A8A' }]}>
-              <Image source={CHART_ICON} style={styles.featureIcon} />
-            </View>
-            <View style={styles.featureTextContainer}>
-              <Text style={styles.featureText}>Data is collected to provide a</Text>
-              <Text style={styles.featureText}>personal experience</Text>
-            </View>
-          </View>
+            <View style={{ flex: 1 }} />
 
-          <View style={styles.featureRow}>
-            <View style={[styles.iconContainer, { backgroundColor: '#1E3A8A' }]}>
-              <Image source={PEOPLE_ICON} style={styles.featureIcon} />
-            </View>
-            <View style={styles.featureTextContainer}>
-              <Text style={styles.featureText}>Your information is never</Text>
-              <Text style={styles.featureText}>sold or shared with third</Text>
-              <Text style={styles.featureText}>parties without your consent</Text>
-            </View>
-          </View>
+            {/* Continue */}
+            <Pressable style={styles.continueButton} onPress={onContinue}>
+              <Text style={styles.continueButtonText}>Continue</Text>
+            </Pressable>
 
-          <View style={styles.featureRow}>
-            <View style={[styles.iconContainer, { backgroundColor: '#6B7280' }]}>
-              <Image source={SHIELD_ICON} style={styles.featureIcon} />
-            </View>
-            <View style={styles.featureTextContainer}>
-              <Text style={styles.featureText}>By clicking continue, you</Text>
-              <Text style={styles.featureText}>agree to the <Text style={styles.linkText}>Privacy Policy</Text></Text>
-              <Text style={styles.featureText}>and <Text style={styles.linkText}>Terms of Service</Text></Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={{ flex: 1 }} />
-
-        {/* Continue */}
-        <Pressable style={styles.continueButton} onPress={onContinue}>
-          <Text style={styles.continueButtonText}>Continue</Text>
-        </Pressable>
-
-        <View style={{ height: sy(24) }} />
-      </View>
+            <View style={{ height: sy(24) }} />
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#F2F2F2' },
-  content: { flex: 1, paddingHorizontal: sx(20) },
+  content: { flexGrow: 1, paddingHorizontal: sx(20) },
 
   headerRow: { flexDirection: 'row', justifyContent: 'space-between' },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: sx(10) },

@@ -10,7 +10,7 @@ export type RootStackParamList = {
   Welcome: undefined;
   Name:  { phone: string };
   Privacy: { phone: string; firstName: string; lastName?: string };
-  Protection: undefined;
+  Protection: { phone: string; firstName: string; lastName?: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

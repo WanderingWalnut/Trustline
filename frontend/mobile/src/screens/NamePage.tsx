@@ -9,6 +9,10 @@ import {
   TextInput,
   Pressable,
   Keyboard,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -23,17 +27,21 @@ const LOGO = require('../../assets/logo.png');
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Name'>;
 type Rt  = RouteProp<RootStackParamList, 'Name'>;
 
-
 export default function NamePage() {
   const navigation = useNavigation<Nav>();
-  const { params } = useRoute<Rt>();            // { phone }
+  const { params } = useRoute<Rt>(); // { phone }
   const phone = params?.phone ?? '';
 
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName]   = React.useState('');
 
+  const firstRef = React.useRef<TextInput>(null);
+  const lastRef  = React.useRef<TextInput>(null);
+
+  const dismiss = () => Keyboard.dismiss();
+
   const goNext = () => {
-    Keyboard.dismiss();
+    dismiss();
     if (!firstName.trim()) {
       alert('Please enter your first name');
       return;
@@ -47,62 +55,67 @@ export default function NamePage() {
 
   return (
     <SafeAreaView style={styles.root}>
-      <View style={styles.content}>
-        {/* Header */}
-        <View style={[styles.headerRow, { marginTop: sy(36) }]}>
-          <View style={styles.brandRow}>
-            <Image source={LOGO} style={styles.logo} resizeMode="contain" />
-            <View>
-              <Text style={styles.brand}>Trustline</Text>
-              <Text style={styles.subtitle}>Scam call protection</Text>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <TouchableWithoutFeedback onPress={dismiss}>
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+            {/* Header */}
+            <View style={[styles.headerRow, { marginTop: sy(36) }]}>
+              <View style={styles.brandRow}>
+                <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+                <View>
+                  <Text style={styles.brand}>Trustline</Text>
+                  <Text style={styles.subtitle}>Scam call protection</Text>
+                </View>
+              </View>
+              <View style={styles.iconsRow}>
+                <Image source={PROFILE_ICON} style={styles.icon} />
+                <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(20) }]} />
+              </View>
             </View>
-          </View>
-          <View style={styles.iconsRow}>
-            <Image source={PROFILE_ICON} style={styles.icon} />
-            <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(20) }]} />
-          </View>
-        </View>
 
-        {/* Title */}
-        <Text style={[styles.welcome, { marginTop: sy(80) }]}>About you!</Text>
-        <Text style={styles.namePrompt}>Add your first and last name</Text>
-        <Text style={styles.nameDescription}>This will help us to get to know who you are.</Text>
+            {/* Title */}
+            <Text style={[styles.welcome, { marginTop: sy(80) }]}>About you!</Text>
+            <Text style={styles.namePrompt}>Add your first and last name</Text>
+            <Text style={styles.nameDescription}>This will help us to get to know who you are.</Text>
 
-        {/* (Optional) show phone passed in */}
-        {/* <Text style={{ textAlign: 'center', marginTop: sy(8), color: '#666' }}>{phone}</Text> */}
+            {/* Inputs */}
+            <View style={{ marginTop: sy(40) }}>
+              <TextInput
+                ref={firstRef}
+                style={[styles.nameInput, { marginBottom: sy(16) }]}
+                placeholder="First Name"
+                placeholderTextColor="#999"
+                value={firstName}
+                onChangeText={setFirstName}
+                autoCapitalize="words"
+                returnKeyType="next"
+                onSubmitEditing={() => lastRef.current?.focus()}   // 👉 jump to last name
+              />
+              <TextInput
+                ref={lastRef}
+                style={styles.nameInput}
+                placeholder="Last Name (optional)"
+                placeholderTextColor="#999"
+                value={lastName}
+                onChangeText={setLastName}
+                autoCapitalize="words"
+                returnKeyType="done"
+                blurOnSubmit
+                onSubmitEditing={goNext}                            // 👉 dismiss + continue
+              />
+            </View>
 
-        {/* Inputs */}
-        <View style={{ marginTop: sy(40) }}>
-          <TextInput
-            style={[styles.nameInput, { marginBottom: sy(16) }]}
-            placeholder="First Name"
-            placeholderTextColor="#999"
-            value={firstName}
-            onChangeText={setFirstName}
-            autoCapitalize="words"
-            returnKeyType="next"
-          />
-          <TextInput
-            style={styles.nameInput}
-            placeholder="Last Name (optional)"
-            placeholderTextColor="#999"
-            value={lastName}
-            onChangeText={setLastName}
-            autoCapitalize="words"
-            returnKeyType="done"
-            onSubmitEditing={goNext}
-          />
-        </View>
+            <View style={{ height: sy(120) }} />
 
-        <View style={{ height: sy(120) }} />
+            {/* Continue */}
+            <Pressable style={styles.continueButton} onPress={goNext}>
+              <Text style={styles.continueButtonText}>Continue</Text>
+            </Pressable>
 
-        {/* Continue */}
-        <Pressable style={styles.continueButton} onPress={goNext}>
-          <Text style={styles.continueButtonText}>Continue</Text>
-        </Pressable>
-
-        <View style={{ height: sy(60) }} />
-      </View>
+            <View style={{ height: sy(60) }} />
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -111,7 +124,7 @@ const INPUT_HEIGHT = sy(48);
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#F2F2F2' },
-  content: { flex: 1, paddingHorizontal: sx(20) },
+  content: { flexGrow: 1, paddingHorizontal: sx(20) },
 
   headerRow: { flexDirection: 'row', justifyContent: 'space-between' },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: sx(10) },
