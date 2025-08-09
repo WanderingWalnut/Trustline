@@ -18,6 +18,7 @@ import {
   InputAccessoryView,
 } from 'react-native';
 import { sx, sy, fs } from '../utils/designScale';
+import type { RootStackParamList } from '../navigations/RootNavigator';
 
 const PROFILE_ICON = require('../../assets/profile.png');
 const SETTINGS_ICON = require('../../assets/settings.png');
@@ -25,14 +26,6 @@ const LOGO = require('../../assets/logo.png');
 const CANADA_FLAG = require('../../assets/flag.png');
 
 const ACCESSORY_ID = 'phoneDone';
-
-// keep this in sync with RootNavigator
-type RootStackParamList = {
-  SplashScreen: undefined;
-  Welcome: undefined;
-  Name: undefined;
-  Protection: undefined;
-};
 
 export default function WelcomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Welcome'>>();
@@ -44,25 +37,23 @@ export default function WelcomeScreen() {
     Keyboard.dismiss();
   };
 
+  // CHANGES: normalize, validate, then navigate with params
   const goNext = () => {
     dismiss();
-    // optional validation:
-    // if (phoneNumber.trim().length < 10) return alert('Enter a valid phone number');
-    navigation.navigate('Name');             // 👈 go to NamePage
-    // or pass data: navigation.navigate('Name', { phone: `+1${phoneNumber}` });
+    const digits = phoneNumber.replace(/\D/g, ''); // keep only 0-9
+    if (digits.length !== 10) {
+      alert('Please enter a 10-digit phone number');
+      return;
+    }
+    const phone = `+1${digits}`; // E.164 style for Canada/US
+    navigation.navigate('Name', { phone });
   };
 
   return (
     <SafeAreaView style={styles.root}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <TouchableWithoutFeedback onPress={dismiss}>
-          <ScrollView
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-          >
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             {/* Header */}
             <View style={[styles.headerRow, { marginTop: sy(36) }]}>
               <View style={styles.brandRow}>
@@ -72,7 +63,6 @@ export default function WelcomeScreen() {
                   <Text style={styles.subtitle}>Scam call protection</Text>
                 </View>
               </View>
-
               <View style={styles.iconsRow}>
                 <Image source={PROFILE_ICON} style={styles.icon} />
                 <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(20) }]} />
@@ -100,9 +90,9 @@ export default function WelcomeScreen() {
                 onChangeText={setPhoneNumber}
                 returnKeyType="done"
                 blurOnSubmit
-                onSubmitEditing={dismiss}
+                onSubmitEditing={goNext}               // allow pressing return to continue
                 inputAccessoryViewID={Platform.OS === 'ios' ? ACCESSORY_ID : undefined}
-                maxLength={10}
+                maxLength={14}                          // allows spaces/dashes as user types
               />
             </View>
 
@@ -121,7 +111,7 @@ export default function WelcomeScreen() {
         {Platform.OS === 'ios' && (
           <InputAccessoryView nativeID={ACCESSORY_ID}>
             <View style={{ alignItems: 'flex-end', padding: 8, backgroundColor: '#EFEFEF' }}>
-              <Pressable onPress={dismiss} hitSlop={8}>
+              <Pressable onPress={goNext} hitSlop={8}>
                 <Text style={{ fontWeight: '600' }}>Done</Text>
               </Pressable>
             </View>
