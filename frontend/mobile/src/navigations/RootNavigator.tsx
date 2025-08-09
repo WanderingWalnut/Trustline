@@ -14,9 +14,10 @@ import ProfileScreen from '../screens/Profile';
 
 export type RootStackParamList = {
   SplashScreen: undefined;
-  Welcome: undefined;
-  Name: { phone: string };
-  Caregiver: { phone: string; firstName: string; lastName?: string };
+  Welcome:  { phone: string };
+  Name:  { phone: string };
+  Caregiver: { phone: string; firstName: string; lastName?: string }; // 👈 NEW
+
   Privacy: {
     phone: string; firstName: string; lastName?: string;
     caregiverFirstName?: string; caregiverLastName?: string; caregiverPhone?: string;
@@ -25,7 +26,8 @@ export type RootStackParamList = {
     phone: string; firstName: string; lastName?: string;
     caregiverFirstName?: string; caregiverLastName?: string; caregiverPhone?: string;
   };
-  LoginCode: { phone: string; firstName: string; lastName?: string };
+
+  LoginCode: { phone: string};
   Settings: undefined;
   Profile: undefined;
 };
