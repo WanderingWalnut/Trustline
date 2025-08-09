@@ -5,7 +5,6 @@ import { sx, sy, fs } from '../utils/designScale';
 
 const PROFILE_ICON = require('../../assets/profile.png');
 const SETTINGS_ICON = require('../../assets/settings.png');
-const LOGO = require('../../assets/logo.png');
 
 const BUTTON_DIAMETER = sx(160);
 const POWER_SIZE = Math.round(BUTTON_DIAMETER * 0.40);
@@ -16,14 +15,11 @@ export default function ProtectionScreen() {
   return (
     <SafeAreaView style={styles.root}>
       <View style={styles.content}>
-        {/* Header */}
+        {/* Header without logo */}
         <View style={[styles.headerRow, { marginTop: sy(36) }]}>
-          <View style={styles.brandRow}>
-            <Image source={LOGO} style={styles.logo} resizeMode="contain" />
-            <View>
-              <Text style={styles.brand}>Trustline</Text>
-              <Text style={styles.subtitle}>Scam call protection</Text>
-            </View>
+          <View>
+            <Text style={styles.brand}>Trustline</Text>
+            <Text style={styles.subtitle}>Scam call protection</Text>
           </View>
 
           <View style={styles.iconsRow}>
@@ -32,7 +28,7 @@ export default function ProtectionScreen() {
           </View>
         </View>
 
-        {/* Greeting (lowered and bigger) */}
+        {/* Greeting */}
         <Text style={[styles.greeting, { marginTop: sy(30) }]}>
           <Text style={styles.hello}>Hello, </Text>
           <Text style={styles.name}>Adam</Text>
@@ -81,16 +77,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: sx(10) },
-  logo: { width: sx(26), height: sx(26) },
   brand: { fontSize: fs(18), fontWeight: '700', color: '#0A0A0A' },
   subtitle: { marginTop: sy(4), fontSize: fs(16), color: '#1B2CC1', fontWeight: '500' },
   iconsRow: { flexDirection: 'row', alignItems: 'center' },
   icon: { width: sx(20), height: sx(20), resizeMode: 'contain' },
 
   greeting: { lineHeight: fs(42) },
-  hello: { fontSize: fs(38), color: '#111', fontWeight: '300' }, // increased font
-  name: { fontSize: fs(38), color: '#2563EB', fontWeight: '300' }, // increased font
+  hello: { fontSize: fs(38), color: '#111', fontWeight: '300' },
+  name: { fontSize: fs(38), color: '#2563EB', fontWeight: '300' },
 
   controls: {
     alignItems: 'center',
