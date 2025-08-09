@@ -1,63 +1,147 @@
 // src/screens/ProtectionScreen.tsx
 import * as React from 'react';
-import { SafeAreaView, View, Text, StyleSheet, Image, Pressable } from 'react-native';
-import colors from '../constants/color';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Pressable,
+  AppState,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sx, sy, fs } from '../utils/designScale';
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigations/RootNavigator';
 
-const PROFILE_ICON = require('../../assets/profile.png');
 const SETTINGS_ICON = require('../../assets/settings.png');
 
+// Smaller button, responsive sizes
 const BUTTON_DIAMETER = sx(160);
-const POWER_SIZE = Math.round(BUTTON_DIAMETER * 0.40);
+const POWER_SIZE = Math.round(BUTTON_DIAMETER * 0.36);
+
+const STORAGE_ON_KEY = 'protection:isOn';
+const STORAGE_START_KEY = 'protection:startAt';
 
 type Rt = RouteProp<RootStackParamList, 'Protection'>;
 
 export default function ProtectionScreen() {
   const { params } = useRoute<Rt>();
-  const [on, setOn] = React.useState(false);
-
-  // Extract from params (fallback if undefined)
   const firstName = params?.firstName ?? 'User';
-  const lastName = params?.lastName ?? '';
+  const lastName = params?.lastName ? ` ${params.lastName}` : '';
+
+  const [on, setOn] = React.useState(false);
+  const [elapsed, setElapsed] = React.useState(0);
+  const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startTimer = React.useCallback((startAtMs: number) => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setElapsed(Math.max(0, Math.floor((Date.now() - startAtMs) / 1000)));
+    }, 1000);
+    setElapsed(Math.max(0, Math.floor((Date.now() - startAtMs) / 1000)));
+  }, []);
+
+  const stopTimer = React.useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setElapsed(0);
+  }, []);
+
+  // Load persisted on/startAt
+  React.useEffect(() => {
+    (async () => {
+      const [onRaw, startRaw] = await Promise.all([
+        AsyncStorage.getItem(STORAGE_ON_KEY),
+        AsyncStorage.getItem(STORAGE_START_KEY),
+      ]);
+      const isOn = onRaw === 'true';
+      setOn(isOn);
+      if (isOn && startRaw) startTimer(Number(startRaw));
+    })();
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [startTimer]);
+
+  // Re-sync when app returns to foreground
+  React.useEffect(() => {
+    const sub = AppState.addEventListener('change', async (state) => {
+      if (state === 'active') {
+        const [onRaw, startRaw] = await Promise.all([
+          AsyncStorage.getItem(STORAGE_ON_KEY),
+          AsyncStorage.getItem(STORAGE_START_KEY),
+        ]);
+        const isOn = onRaw === 'true';
+        if (isOn && startRaw) startTimer(Number(startRaw));
+      }
+    });
+    return () => sub.remove();
+  }, [startTimer]);
+
+  const toggle = async () => {
+    if (on) {
+      // turn OFF
+      setOn(false);
+      stopTimer();
+      await AsyncStorage.multiRemove([STORAGE_ON_KEY, STORAGE_START_KEY]);
+      await AsyncStorage.setItem(STORAGE_ON_KEY, 'false');
+    } else {
+      // turn ON
+      const now = Date.now();
+      setOn(true);
+      startTimer(now);
+      await AsyncStorage.setItem(STORAGE_ON_KEY, 'true');
+      await AsyncStorage.setItem(STORAGE_START_KEY, String(now));
+    }
+  };
+
+  const hhmmss = (s: number) => {
+    const hh = Math.floor(s / 3600).toString().padStart(2, '0');
+    const mm = Math.floor((s % 3600) / 60).toString().padStart(2, '0');
+    const ss = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${hh}:${mm}:${ss}`;
+  };
 
   return (
     <SafeAreaView style={styles.root}>
-      <View style={styles.content}>
-        {/* Header without logo */}
-        <View style={[styles.headerRow, { marginTop: sy(36) }]}>
-          <View>
-            <Text style={styles.brand}>Trustline</Text>
-            <Text style={styles.subtitle}>Scam call protection</Text>
+      {/* Split screen into top (brand + greeting) and bottom (controls) */}
+      <View style={styles.screen}>
+        {/* TOP */}
+        <View style={styles.top}>
+          {/* Header with bigger settings icon */}
+          <View style={[styles.headerRow, { marginTop: sy(20) }]}>
+            <View>
+              <Text style={styles.brand}>Trustline</Text>
+              <Text style={styles.subtitle}>Scam call protection</Text>
+            </View>
+            <Pressable onPress={() => { /* TODO: navigate to Settings */ }}>
+              <Image source={SETTINGS_ICON} style={styles.settingsIcon} />
+            </Pressable>
           </View>
 
-          <View style={styles.iconsRow}>
-            <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(12) }]} />
-          </View>
+          {/* Greeting */}
+          <Text style={[styles.greeting, { marginTop: sy(18) }]}>
+            <Text style={styles.hello}>Hello, </Text>
+            <Text style={styles.name}>{firstName}{lastName}</Text>
+          </Text>
         </View>
 
-        {/* Greeting */}
-        <Text style={[styles.greeting, { marginTop: sy(30) }]}>
-          <Text style={styles.hello}>Hello, </Text>
-          <Text style={styles.name}>
-            {firstName}{lastName ? ` ${lastName}` : ''}
+        {/* BOTTOM (pinned near bottom on all devices) */}
+        <View style={styles.bottom}>
+          <Text style={styles.toggleLabel}>
+            {on ? 'press button to turn off' : 'press button to turn on'}
           </Text>
-        </Text>
-
-        <View style={{ flex: 1 }} />
-
-        {/* Controls */}
-        <View style={styles.controls}>
-          <Text style={styles.toggleLabel}>{on ? 'turn off' : 'turn on'}</Text>
 
           <Pressable
-            onPress={() => setOn(v => !v)}
+            onPress={toggle}
             style={({ pressed }) => [
               styles.powerBtn,
               {
-                backgroundColor: on ? '#1E3A8A'  : '#8F8E8E',
+                backgroundColor: on ? '#1E3A8A' : '#8F8E8E', // ON blue, OFF gray
                 opacity: pressed ? 0.92 : 1,
               },
             ]}
@@ -65,44 +149,52 @@ export default function ProtectionScreen() {
             <Text style={styles.powerGlyph}>⏻</Text>
           </Pressable>
 
-          <Text style={styles.statusText}>{on ? 'Connected' : 'Not connected'}</Text>
-        </View>
+          <View style={{ alignItems: 'center', marginTop: sy(10) }}>
+            <Text style={styles.statusText}>{on ? 'Connected' : 'Not connected'}</Text>
+            <Text style={[styles.timerText, { opacity: on ? 1 : 0.6 }]}>
+              {on ? hhmmss(elapsed) : '00:00:00'}
+            </Text>
+          </View>
 
-        <View style={{ height: sy(24) }} />
+          {/* bottom spacer so it sits off the home indicator */}
+          <View style={{ height: sy(20) }} />
+        </View>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: '#F2F2F2',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: sx(20),
-  },
+  root: { flex: 1, backgroundColor: '#F2F2F2' },
 
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  brand: { fontSize: fs(18), fontWeight: '700', color: '#0A0A0A' },
-  subtitle: { marginTop: sy(4), fontSize: fs(16), color: '#1B2CC1', fontWeight: '500' },
-  iconsRow: { flexDirection: 'row', alignItems: 'center' },
-  icon: { width: sx(20), height: sx(20), resizeMode: 'contain' },
+  // Main layout: pin controls to bottom
+  screen: { flex: 1, paddingHorizontal: sx(20), justifyContent: 'space-between' },
 
-  greeting: { lineHeight: fs(42) },
-  hello: { fontSize: fs(38), color: '#111', fontWeight: '300' },
-  name: { fontSize: fs(38), color: '#2563EB', fontWeight: '300' },
+  top: {},
 
-  controls: {
+  bottom: {
     alignItems: 'center',
     paddingBottom: sy(12),
   },
-  toggleLabel: { fontSize: fs(18), color: '#1B2CC1', marginBottom: sy(10) },
+
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  brand: { fontSize: fs(18), fontWeight: '700', color: '#0A0A0A' },
+  subtitle: { marginTop: sy(4), fontSize: fs(16), color: '#1B2CC1', fontWeight: '500' },
+
+  // slightly larger settings icon
+  settingsIcon: { width: sx(34), height: sx(34), resizeMode: 'contain' },
+
+  greeting: { lineHeight: fs(44) },
+  hello: { fontSize: fs(40), color: '#111', fontWeight: '300' },
+  name: { fontSize: fs(40), color: '#2563EB', fontWeight: '300' },
+
+  // larger label text
+  toggleLabel: {
+    fontSize: fs(20),
+    color: '#1B2CC1',
+    marginBottom: sy(12),
+    textAlign: 'center',
+  },
 
   powerBtn: {
     width: BUTTON_DIAMETER,
@@ -118,10 +210,7 @@ const styles = StyleSheet.create({
   },
   powerGlyph: { fontSize: POWER_SIZE, color: '#fff' },
 
-  statusText: {
-    marginTop: sy(12),
-    fontSize: fs(18),
-    color: '#1B2CC1',
-    textDecorationLine: 'underline',
-  },
+  // larger status + timer
+  statusText: { fontSize: fs(20), color: '#1B2CC1', textDecorationLine: 'underline' },
+  timerText: { fontSize: fs(18), color: '#1B2CC1', marginTop: sy(6) },
 });

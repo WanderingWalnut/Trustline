@@ -1,8 +1,18 @@
 // src/screens/CaregiverPage.tsx
 import * as React from 'react';
 import {
-  SafeAreaView, View, Text, StyleSheet, Image, TextInput, Pressable,
-  KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Platform, ScrollView
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TextInput,
+  Pressable,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,8 +21,6 @@ import type { RootStackParamList } from '../navigations/RootNavigator';
 import { sx, sy, fs } from '../utils/designScale';
 
 const LOGO = require('../../assets/logo.png');
-const PROFILE_ICON = require('../../assets/profile.png');
-const SETTINGS_ICON = require('../../assets/settings.png');
 const CANADA_FLAG = require('../../assets/flag.png');
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Caregiver'>;
@@ -25,10 +33,8 @@ export default function CaregiverPage() {
   const { params } = useRoute<Rt>(); // { phone, firstName, lastName? }
 
   const [cgFirst, setCgFirst] = React.useState('');
-  const [cgLast, setCgLast]   = React.useState('');
   const [cgPhone, setCgPhone] = React.useState('');
 
-  const lastRef  = React.useRef<TextInput>(null);
   const phoneRef = React.useRef<TextInput>(null);
 
   const dismiss = () => Keyboard.dismiss();
@@ -36,18 +42,17 @@ export default function CaregiverPage() {
   const goNext = () => {
     dismiss();
     const digits = cgPhone.replace(/\D/g, '');
-    const payload = {
+    navigation.navigate('Privacy', {
       phone: params.phone,
       firstName: params.firstName,
       lastName: params.lastName,
       caregiverFirstName: cgFirst.trim() || undefined,
-      caregiverLastName:  cgLast.trim()  || undefined,
-      caregiverPhone:     digits ? `+1${digits}` : undefined,
-    };
-    navigation.navigate('Privacy', payload);
+      caregiverPhone: digits ? `+1${digits}` : undefined,
+    });
   };
 
   const skip = () => {
+    dismiss();
     navigation.navigate('Privacy', {
       phone: params.phone,
       firstName: params.firstName,
@@ -60,7 +65,7 @@ export default function CaregiverPage() {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <TouchableWithoutFeedback onPress={dismiss}>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-            {/* Header */}
+            {/* Header (no profile/settings icons) */}
             <View style={[styles.headerRow, { marginTop: sy(36) }]}>
               <View style={styles.brandRow}>
                 <Image source={LOGO} style={styles.logo} resizeMode="contain" />
@@ -71,10 +76,12 @@ export default function CaregiverPage() {
               </View>
             </View>
 
-            {/* Title */}
+            {/* Title & helper */}
             <Text style={[styles.title, { marginTop: sy(60) }]}>Caregiver</Text>
             <Text style={styles.link}>Add your caregivers information</Text>
-            <Text style={styles.help}>This helps us to know who to{'\n'}contact in time of need</Text>
+            <Text style={styles.help}>
+              This helps us to know who to{'\n'}contact in time of need
+            </Text>
 
             {/* Inputs */}
             <View style={{ marginTop: sy(24) }}>
@@ -86,21 +93,10 @@ export default function CaregiverPage() {
                 onChangeText={setCgFirst}
                 autoCapitalize="words"
                 returnKeyType="next"
-                onSubmitEditing={() => lastRef.current?.focus()}
-              />
-              <TextInput
-                ref={lastRef}
-                style={[styles.input, { marginBottom: sy(12) }]}
-                placeholder="Last Name"
-                placeholderTextColor="#999"
-                value={cgLast}
-                onChangeText={setCgLast}
-                autoCapitalize="words"
-                returnKeyType="next"
                 onSubmitEditing={() => phoneRef.current?.focus()}
               />
 
-              {/* phone row */}
+              {/* Phone row */}
               <View style={styles.phoneRow}>
                 <View style={styles.flagPill}>
                   <Image source={CANADA_FLAG} style={styles.flag} />
@@ -123,12 +119,14 @@ export default function CaregiverPage() {
 
             <View style={{ height: sy(28) }} />
 
+            {/* Continue */}
             <Pressable style={styles.cta} onPress={goNext}>
               <Text style={styles.ctaText}>Continue</Text>
             </Pressable>
 
-            <Pressable onPress={skip} style={{ alignSelf: 'center', marginTop: sy(12) }}>
-              <Text style={{ color: '#1B2CC1' }}>skip for now &gt;&gt;</Text>
+            {/* Skip for now — bigger and a bit lower */}
+            <Pressable onPress={skip} style={{ alignSelf: 'center', marginTop: sy(20) }}>
+              <Text style={styles.skipText}>skip for now &gt;&gt;</Text>
             </Pressable>
 
             <View style={{ height: sy(32) }} />
@@ -148,8 +146,6 @@ const styles = StyleSheet.create({
   logo: { width: sx(50), height: sx(50) },
   brand: { fontSize: fs(18), fontWeight: '700', color: '#0A0A0A' },
   subtitle: { marginTop: sy(4), fontSize: fs(16), color: '#1B2CC1', fontWeight: '500' },
-  iconsRow: { flexDirection: 'row', alignItems: 'center' },
-  icon: { width: sx(20), height: sx(20), resizeMode: 'contain' },
 
   title: { fontSize: fs(28), color: '#0A0A0A' },
   link: { fontSize: fs(18), color: '#1B2CC1', marginTop: sy(8) },
@@ -184,4 +180,12 @@ const styles = StyleSheet.create({
     borderRadius: sx(25),
   },
   ctaText: { fontSize: fs(16), color: '#000' },
+
+  skipText: {
+    color: '#1B2CC1',
+    fontSize: fs(16),        // bigger
+    fontWeight: '600',       // bolder
+    textDecorationLine: 'none',
+  },
 });
+
