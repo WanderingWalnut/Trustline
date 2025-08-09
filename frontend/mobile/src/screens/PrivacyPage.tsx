@@ -53,6 +53,9 @@ export default function PrivacyScreen() {
       phone: phone,
       firstName: firstName,
       lastName: params?.lastName,
+      caregiverFirstName: params?.caregiverFirstName,
+      caregiverLastName: params?.caregiverLastName,
+      caregiverPhone: params?.caregiverPhone,
     }); // enter the app; no back to Privacy
   };
 

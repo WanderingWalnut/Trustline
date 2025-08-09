@@ -46,7 +46,7 @@ export default function NamePage() {
       alert('Please enter your first name');
       return;
     }
-    navigation.navigate('Privacy', {
+    navigation.navigate('Caregiver', {
       phone,
       firstName: firstName.trim(),
       lastName: lastName.trim() || undefined,
