@@ -1,97 +1,116 @@
+// src/screens/ProtectionScreen.tsx
 import * as React from 'react';
-import { SafeAreaView, View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-// Update the import path below if your colors file is located elsewhere, for example:
-import colors from '../constants/color';
-// Or create the file './constants/colors.ts' if it doesn't exist.
-import PowerButton from '../components/Powerbutton';
+import { SafeAreaView, View, Text, StyleSheet, Image, Pressable } from 'react-native';
+import colors from '../constants/color';        // or ../constants/colors
 import { sx, sy, fs } from '../utils/designScale';
+
+const PROFILE_ICON = require('../../assets/profile.png');
+const SETTINGS_ICON = require('../../assets/settings.png');
 
 export default function ProtectionScreen() {
   const [on, setOn] = React.useState(false);
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Top-right icons (Figma: person 32x48 @ top50 left296; settings 34x61 @ top43 left329) */}
-      <View style={[styles.iconWrap, { top: sy(50), left: sx(296) }]}>
-        <Ionicons name="person-circle-outline" size={sx(28)} color={colors.text} />
-      </View>
-      <View style={[styles.iconWrap, { top: sy(43), left: sx(329) }]}>
-        <Ionicons name="settings-outline" size={sx(28)} color={colors.text} />
+    <SafeAreaView style={styles.root}>
+      {/* Header text (lowered) */}
+      <View style={styles.headerText}>
+        <Text style={styles.brand}>Trustline</Text>
+        <Text style={styles.subtitle}>Scam call protection</Text>
       </View>
 
-      {/* Brand (Trustline @ top63 left27, 20px bold) */}
-      <Text style={[styles.brand, { top: sy(63), left: sx(27) }]}>Trustline</Text>
+      {/* Icons aligned to brand row */}
+      <View style={styles.headerIcons}>
+        <Image source={PROFILE_ICON} style={styles.icon} />
+        <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(12) }]} />
+      </View>
 
-      {/* Subtitle (Scam call protection @ top85 left28, 20px, #1B2CC1) */}
-      <Text style={[styles.subtitle, { top: sy(85), left: sx(28) }]}>
-        Scam call protection
-      </Text>
-
-      {/* Greeting (Hello, Adam @ top146 left28, 36px; Adam blue + underline) */}
-      <View style={[styles.greetingRow, { top: sy(146), left: sx(28) }]}>
+      {/* Greeting */}
+      <View style={styles.greetingRow}>
         <Text style={styles.hello}>Hello, </Text>
         <Text style={styles.name}>Adam</Text>
       </View>
 
-      {/* Label above button */}
-      <Text style={[styles.toggleLabel, { top: sy(545), left: sx(170) }]}>
-        {on ? 'turn off' : 'turn on'}
-      </Text>
+      {/* Bottom block (centered) */}
+      <View style={styles.bottomBlock}>
+        <Text style={styles.toggleLabel}>{on ? 'turn off' : 'turn on'}</Text>
 
-      {/* Power button: ellipse 137×142 @ top579 left128 → use diameter 137 */}
-      <View style={[styles.absolute, { top: sy(579), left: sx(128) }]}>
-        <PowerButton
-          on={on}
-          onToggle={() => setOn(v => !v)}
-          diameter={sx(137)}
-          colorOn={colors.onOrange}
-          colorOff={colors.offBlue}
-        />
+        <Pressable
+          onPress={() => setOn(v => !v)}
+          style={({ pressed }) => [
+            styles.powerBtn,
+            { backgroundColor: on ? colors.onOrange : colors.offBlue, opacity: pressed ? 0.92 : 1 },
+          ]}
+        >
+          <Text style={styles.powerGlyph}>⏻</Text>
+        </Pressable>
+
+        <Text style={styles.statusText}>{on ? 'connected' : 'Not connected'}</Text>
       </View>
-
-      {/* Status text below button */}
-      <Text style={[styles.status, { top: sy(730), left: sx(168) }]}>
-        {on ? 'connected' : ''}
-      </Text>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  absolute: { position: 'absolute' },
-  iconWrap: { position: 'absolute' },
+/* —— layout tweaks —— */
+const BUTTON_DIAMETER = sx(157);            // bigger button (was 180 / 137)
+const POWER_SIZE = BUTTON_DIAMETER * 0.45;  // icon ~45% of button
 
-  brand: {
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#fff' },
+
+  // Lowered header
+  headerText: {
     position: 'absolute',
-    fontSize: fs(20),
-    fontWeight: '700',
-    color: colors.text,
+    left: sx(28),
+    top: sy(85),     // bump this up/down to taste
   },
-  subtitle: {
+  brand: { fontSize: fs(20), fontWeight: '700', color: '#000' },
+  subtitle: { marginTop: sy(6), fontSize: fs(20), color: '#1B2CC1' },
+
+  // Icons aligned with brand
+  headerIcons: {
     position: 'absolute',
-    fontSize: fs(20),
-    color: colors.accentBlue,
+    right: sx(16),
+    top: sy(85),
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  greetingRow: { position: 'absolute', flexDirection: 'row' },
-  hello: { fontSize: fs(36), color: colors.text, fontWeight: '400' },
-  name: {
-    fontSize: fs(36),
-    fontWeight: '400',
-    color: colors.nameBlue,
-    textDecorationLine: 'underline',
-  },
-  toggleLabel: {
+  icon: { width: sx(24), height: sx(24), resizeMode: 'contain' },
+
+  // Greeting; no underline
+  greetingRow: {
     position: 'absolute',
-    fontSize: fs(12),
-    color: colors.dim,
-    textTransform: 'lowercase',
+    left: sx(28),
+    top: sy(150),
+    flexDirection: 'row',
+    alignItems: 'baseline',
   },
-  status: {
+  hello: { fontSize: fs(36), color: '#000' },
+  name: { fontSize: fs(36), color: '#2563EB' },
+
+  // Centered power section
+  bottomBlock: {
     position: 'absolute',
-    fontSize: fs(12),
-    color: colors.dim,
-    textTransform: 'lowercase',
+    left: 0,
+    right: 0,
+    bottom: sy(90),
+    alignItems: 'center',
   },
+
+  // 20px blue labels per your spec
+  toggleLabel: { fontSize: fs(20), color: '#1B2CC1', marginBottom: sy(12) },
+  statusText: { marginTop: sy(12), fontSize: fs(20), color: '#1B2CC1' },
+
+  powerBtn: {
+    width: BUTTON_DIAMETER,
+    height: BUTTON_DIAMETER,
+    borderRadius: BUTTON_DIAMETER / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
+  },
+  powerGlyph: { fontSize: POWER_SIZE, color: '#fff' }, // bigger icon
 });
