@@ -15,10 +15,10 @@ import { sx, sy, fs } from '../utils/designScale';
 const PROFILE_ICON = require('../../assets/profile.png');
 const SETTINGS_ICON = require('../../assets/settings.png');
 const LOGO = require('../../assets/logo.png');
-const CANADA_FLAG = require('../../assets/flag.png');
 
 export default function WelcomeScreen() {
-  const [phoneNumber, setPhoneNumber] = React.useState('');
+  const [firstName, setFirstName] = React.useState('');
+  const [lastName, setLastName] = React.useState('');
 
   return (
     <SafeAreaView style={styles.root}>
@@ -40,28 +40,32 @@ export default function WelcomeScreen() {
         </View>
 
         {/* Welcome Text */}
-        <Text style={[styles.welcome, { marginTop: sy(80) }]}>Welcome</Text>
-        <Text style={styles.phonePrompt}>Add your phone number</Text>
-        <Text style={styles.phoneDescription}>This will help send notifications to alert you about scam calls.</Text>
+        <Text style={[styles.welcome, { marginTop: sy(80) }]}>About you!</Text>
+        <Text style={styles.namePrompt}>Add your first and last name</Text>
+        <Text style={styles.nameDescription}>This will help us to get to know who you are.</Text>
 
-        {/* Phone Input */}
-        <View style={[styles.phoneInputContainer, { marginTop: sy(40) }]}>
-          <Image source={CANADA_FLAG} style={styles.flag} />
-          <Text style={styles.countryCode}>+1</Text>
+        {/* Name Inputs */}
+        <View style={{ marginTop: sy(40) }}>
           <TextInput
-            style={styles.phoneInput}
-            placeholder="Phone Number"
+            style={[styles.nameInput, { marginBottom: sy(16) }]}
+            placeholder="First Name"
             placeholderTextColor="#999"
-            keyboardType="phone-pad"
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+          <TextInput
+            style={styles.nameInput}
+            placeholder="Last Name"
+            placeholderTextColor="#999"
+            value={lastName}
+            onChangeText={setLastName}
           />
         </View>
 
         <View style={{ height: sy(120) }} />
 
         {/* Continue Button */}
-        <Pressable style={styles.continueButton} onPress={() => console.log(phoneNumber)}>
+        <Pressable style={styles.continueButton} onPress={() => console.log(firstName, lastName)}>
           <Text style={styles.continueButtonText}>Continue</Text>
         </Pressable>
 
@@ -87,7 +91,6 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // alignItems: 'center',  // moved inline to fix icons alignment
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: sx(10) },
   logo: { width: sx(50), height: sx(50) },
@@ -95,37 +98,23 @@ const styles = StyleSheet.create({
   subtitle: { marginTop: sy(4), fontSize: fs(16), color: '#1B2CC1', fontWeight: '500' },
   iconsRow: {
     flexDirection: 'row',
-    alignItems: 'center',  // vertically center icons
+    alignItems: 'center',
   },
   icon: { width: sx(20), height: sx(20), resizeMode: 'contain' },
 
   // Welcome text
   welcome: { fontSize: fs(28), fontWeight: '400', color: '#0A0A0A', textAlign: 'center' },
-  phonePrompt: { fontSize: fs(18), color: '#1B2CC1', textAlign: 'center', marginTop: sy(10) },
-  phoneDescription: { fontSize: fs(16), color: '#000', textAlign: 'center', marginTop: sy(4) },
+  namePrompt: { fontSize: fs(18), color: '#1B2CC1', textAlign: 'center', marginTop: sy(10) },
+  nameDescription: { fontSize: fs(16), color: '#000', textAlign: 'center', marginTop: sy(4) },
 
-  // Phone input
-  phoneInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  // Name inputs
+  nameInput: {
     backgroundColor: '#DADADA',
     borderRadius: INPUT_HEIGHT / 2,
     height: INPUT_HEIGHT,
-    paddingHorizontal: sx(12),
-  },
-  flag: {
-    width: sx(28),
-    height: sy(20),
-    marginRight: sx(8),
-    borderRadius: 3,
-    resizeMode: 'cover',
-  },
-  countryCode: { fontSize: fs(16), color: '#000', marginRight: sx(8) },
-  phoneInput: {
-    flex: 1,
+    paddingHorizontal: sx(16),
     fontSize: fs(16),
     color: '#000',
-    paddingVertical: 0,
   },
 
   // Continue button
