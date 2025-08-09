@@ -8,8 +8,13 @@ import {
   Image,
   TextInput,
   Pressable,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
+  ScrollView,
+  InputAccessoryView,
 } from 'react-native';
-import colors from '../constants/color';
 import { sx, sy, fs } from '../utils/designScale';
 
 const PROFILE_ICON = require('../../assets/profile.png');
@@ -17,94 +22,114 @@ const SETTINGS_ICON = require('../../assets/settings.png');
 const LOGO = require('../../assets/logo.png');
 const CANADA_FLAG = require('../../assets/flag.png');
 
+const ACCESSORY_ID = 'phoneDone';
+
 export default function WelcomeScreen() {
   const [phoneNumber, setPhoneNumber] = React.useState('');
+  const inputRef = React.useRef<TextInput>(null);
+
+  const dismiss = () => {
+    inputRef.current?.blur();
+    Keyboard.dismiss();
+  };
 
   return (
     <SafeAreaView style={styles.root}>
-      <View style={styles.content}>
-        {/* Header */}
-        <View style={[styles.headerRow, { marginTop: sy(36) }]}>
-          <View style={styles.brandRow}>
-            <Image source={LOGO} style={styles.logo} resizeMode="contain" />
-            <View>
-              <Text style={styles.brand}>Trustline</Text>
-              <Text style={styles.subtitle}>Scam call protection</Text>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <TouchableWithoutFeedback onPress={dismiss}>
+          <ScrollView
+            contentContainerStyle={styles.content}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Header */}
+            <View style={[styles.headerRow, { marginTop: sy(36) }]}>
+              <View style={styles.brandRow}>
+                <Image source={LOGO} style={styles.logo} resizeMode="contain" />
+                <View>
+                  <Text style={styles.brand}>Trustline</Text>
+                  <Text style={styles.subtitle}>Scam call protection</Text>
+                </View>
+              </View>
+
+              <View style={styles.iconsRow}>
+                <Image source={PROFILE_ICON} style={styles.icon} />
+                <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(20) }]} />
+              </View>
             </View>
-          </View>
 
-          <View style={styles.iconsRow}>
-            <Image source={PROFILE_ICON} style={styles.icon} />
-            <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(20) }]} />
-          </View>
-        </View>
+            {/* Welcome Text */}
+            <Text style={[styles.welcome, { marginTop: sy(80) }]}>Welcome</Text>
+            <Text style={styles.phonePrompt}>Add your phone number</Text>
+            <Text style={styles.phoneDescription}>
+              This will help send notifications to alert you about scam calls.
+            </Text>
 
-        {/* Welcome Text */}
-        <Text style={[styles.welcome, { marginTop: sy(80) }]}>Welcome</Text>
-        <Text style={styles.phonePrompt}>Add your phone number</Text>
-        <Text style={styles.phoneDescription}>This will help send notifications to alert you about scam calls.</Text>
+            {/* Phone Input */}
+            <View style={[styles.phoneInputContainer, { marginTop: sy(40) }]}>
+              <Image source={CANADA_FLAG} style={styles.flag} />
+              <Text style={styles.countryCode}>+1</Text>
+              <TextInput
+                ref={inputRef}
+                style={styles.phoneInput}
+                placeholder="Phone Number"
+                placeholderTextColor="#999"
+                keyboardType="number-pad"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                returnKeyType="done"
+                blurOnSubmit
+                onSubmitEditing={dismiss}
+                inputAccessoryViewID={Platform.OS === 'ios' ? ACCESSORY_ID : undefined}
+                maxLength={10}
+              />
+            </View>
 
-        {/* Phone Input */}
-        <View style={[styles.phoneInputContainer, { marginTop: sy(40) }]}>
-          <Image source={CANADA_FLAG} style={styles.flag} />
-          <Text style={styles.countryCode}>+1</Text>
-          <TextInput
-            style={styles.phoneInput}
-            placeholder="Phone Number"
-            placeholderTextColor="#999"
-            keyboardType="phone-pad"
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-          />
-        </View>
+            <View style={{ height: sy(120) }} />
 
-        <View style={{ height: sy(120) }} />
+            {/* Continue Button */}
+            <Pressable style={styles.continueButton} onPress={dismiss}>
+              <Text style={styles.continueButtonText}>Continue</Text>
+            </Pressable>
 
-        {/* Continue Button */}
-        <Pressable style={styles.continueButton} onPress={() => console.log(phoneNumber)}>
-          <Text style={styles.continueButtonText}>Continue</Text>
-        </Pressable>
+            <View style={{ height: sy(60) }} />
+          </ScrollView>
+        </TouchableWithoutFeedback>
 
-        <View style={{ height: sy(60) }} />
-      </View>
+        {/* iOS "Done" bar above keyboard */}
+        {Platform.OS === 'ios' && (
+          <InputAccessoryView nativeID={ACCESSORY_ID}>
+            <View style={{ alignItems: 'flex-end', padding: 8, backgroundColor: '#EFEFEF' }}>
+              <Pressable onPress={dismiss} hitSlop={8}>
+                <Text style={{ fontWeight: '600' }}>Done</Text>
+              </Pressable>
+            </View>
+          </InputAccessoryView>
+        )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const INPUT_HEIGHT = sy(48);
-
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: '#F2F2F2',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: sx(20),
-  },
+  root: { flex: 1, backgroundColor: '#F2F2F2' },
+  content: { flexGrow: 1, paddingHorizontal: sx(20) },
 
-  // Header
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    // alignItems: 'center',  // moved inline to fix icons alignment
-  },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between' },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: sx(10) },
   logo: { width: sx(50), height: sx(50) },
   brand: { fontSize: fs(18), fontWeight: '700', color: '#0A0A0A' },
   subtitle: { marginTop: sy(4), fontSize: fs(16), color: '#1B2CC1', fontWeight: '500' },
-  iconsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',  // vertically center icons
-  },
+  iconsRow: { flexDirection: 'row', alignItems: 'center' },
   icon: { width: sx(20), height: sx(20), resizeMode: 'contain' },
 
-  // Welcome text
   welcome: { fontSize: fs(28), fontWeight: '400', color: '#0A0A0A', textAlign: 'center' },
   phonePrompt: { fontSize: fs(18), color: '#1B2CC1', textAlign: 'center', marginTop: sy(10) },
   phoneDescription: { fontSize: fs(16), color: '#000', textAlign: 'center', marginTop: sy(4) },
 
-  // Phone input
   phoneInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -113,22 +138,10 @@ const styles = StyleSheet.create({
     height: INPUT_HEIGHT,
     paddingHorizontal: sx(12),
   },
-  flag: {
-    width: sx(28),
-    height: sy(20),
-    marginRight: sx(8),
-    borderRadius: 3,
-    resizeMode: 'cover',
-  },
+  flag: { width: sx(28), height: sy(20), marginRight: sx(8), borderRadius: 3, resizeMode: 'cover' },
   countryCode: { fontSize: fs(16), color: '#000', marginRight: sx(8) },
-  phoneInput: {
-    flex: 1,
-    fontSize: fs(16),
-    color: '#000',
-    paddingVertical: 0,
-  },
+  phoneInput: { flex: 1, fontSize: fs(16), color: '#000', paddingVertical: 0 },
 
-  // Continue button
   continueButton: {
     alignSelf: 'center',
     backgroundColor: '#D0D0D0',
