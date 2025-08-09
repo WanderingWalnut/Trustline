@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { StackNavigationProp } from '@react-navigation/stack';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type RootStackParamList = {
   SplashScreen: undefined;
@@ -11,7 +11,7 @@ type RootStackParamList = {
 };
 
 export default function SplashScreen() {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'SplashScreen'>>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'SplashScreen'>>();
 
   useEffect(() => {
     const timer = setTimeout(() => {

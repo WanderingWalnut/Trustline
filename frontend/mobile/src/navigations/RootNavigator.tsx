@@ -8,16 +8,16 @@ import PrivacyPage from '../screens/PrivacyPage';
 export type RootStackParamList = {
   SplashScreen: undefined;
   Welcome: undefined;
-  Protection: undefined;
-  Name: undefined;
-  Privacy: undefined;
+  Name:  { phone: string };
+  Privacy: { phone: string; firstName: string; lastName?: string };
+  Protection: { phone: string; firstName: string; lastName?: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Privacy">
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="SplashScreen">
       <Stack.Screen name="SplashScreen" component={SplashScreen} />
       <Stack.Screen name="Name" component={NamePage} />
       <Stack.Screen name="Welcome" component={WelcomePage} />

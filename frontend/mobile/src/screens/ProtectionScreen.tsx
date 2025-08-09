@@ -1,7 +1,11 @@
+// src/screens/ProtectionScreen.tsx
 import * as React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, Image, Pressable } from 'react-native';
 import colors from '../constants/color';
 import { sx, sy, fs } from '../utils/designScale';
+import { useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
+import type { RootStackParamList } from '../navigations/RootNavigator';
 
 const PROFILE_ICON = require('../../assets/profile.png');
 const SETTINGS_ICON = require('../../assets/settings.png');
@@ -9,8 +13,15 @@ const SETTINGS_ICON = require('../../assets/settings.png');
 const BUTTON_DIAMETER = sx(160);
 const POWER_SIZE = Math.round(BUTTON_DIAMETER * 0.40);
 
+type Rt = RouteProp<RootStackParamList, 'Protection'>;
+
 export default function ProtectionScreen() {
+  const { params } = useRoute<Rt>();
   const [on, setOn] = React.useState(false);
+
+  // Extract from params (fallback if undefined)
+  const firstName = params?.firstName ?? 'User';
+  const lastName = params?.lastName ?? '';
 
   return (
     <SafeAreaView style={styles.root}>
@@ -31,7 +42,9 @@ export default function ProtectionScreen() {
         {/* Greeting */}
         <Text style={[styles.greeting, { marginTop: sy(30) }]}>
           <Text style={styles.hello}>Hello, </Text>
-          <Text style={styles.name}>Adam</Text>
+          <Text style={styles.name}>
+            {firstName}{lastName ? ` ${lastName}` : ''}
+          </Text>
         </Text>
 
         <View style={{ flex: 1 }} />
@@ -113,4 +126,3 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
 });
-
