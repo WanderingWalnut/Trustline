@@ -53,6 +53,9 @@ export default function PrivacyScreen() {
       phone: phone,
       firstName: firstName,
       lastName: params?.lastName,
+      caregiverFirstName: params?.caregiverFirstName,
+      caregiverLastName: params?.caregiverLastName,
+      caregiverPhone: params?.caregiverPhone,
     }); // enter the app; no back to Privacy
   };
 
@@ -73,10 +76,6 @@ export default function PrivacyScreen() {
                   <Text style={styles.brand}>Trustline</Text>
                   <Text style={styles.subtitle}>Scam call protection</Text>
                 </View>
-              </View>
-              <View style={styles.iconsRow}>
-                <Image source={PROFILE_ICON} style={styles.icon} />
-                <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(12) }]} />
               </View>
             </View>
 

@@ -46,7 +46,7 @@ export default function NamePage() {
       alert('Please enter your first name');
       return;
     }
-    navigation.navigate('Privacy', {
+    navigation.navigate('Caregiver', {
       phone,
       firstName: firstName.trim(),
       lastName: lastName.trim() || undefined,
@@ -66,10 +66,6 @@ export default function NamePage() {
                   <Text style={styles.brand}>Trustline</Text>
                   <Text style={styles.subtitle}>Scam call protection</Text>
                 </View>
-              </View>
-              <View style={styles.iconsRow}>
-                <Image source={PROFILE_ICON} style={styles.icon} />
-                <Image source={SETTINGS_ICON} style={[styles.icon, { marginLeft: sx(20) }]} />
               </View>
             </View>
 

@@ -4,14 +4,23 @@ import ProtectionScreen from '../screens/ProtectionScreen';
 import SplashScreen from '../screens/SplashScreen';
 import NamePage from '../screens/NamePage';
 import PrivacyPage from '../screens/PrivacyPage';
+import CaregiverPage from '../screens/CaregiverPage';
 
 export type RootStackParamList = {
   SplashScreen: undefined;
   Welcome: undefined;
   Name:  { phone: string };
-  Privacy: { phone: string; firstName: string; lastName?: string };
-  Protection: { phone: string; firstName: string; lastName?: string };
-};
+  Caregiver: { phone: string; firstName: string; lastName?: string }; // 👈 NEW
+  Privacy: {
+    phone: string; firstName: string; lastName?: string;
+    caregiverFirstName?: string; caregiverLastName?: string; caregiverPhone?: string;
+  };
+  Protection: {
+    phone: string; firstName: string; lastName?: string;
+    caregiverFirstName?: string; caregiverLastName?: string; caregiverPhone?: string;
+  };
+
+  };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -21,6 +30,7 @@ export default function RootNavigator() {
       <Stack.Screen name="SplashScreen" component={SplashScreen} />
       <Stack.Screen name="Name" component={NamePage} />
       <Stack.Screen name="Welcome" component={WelcomePage} />
+      <Stack.Screen name="Caregiver" component={CaregiverPage} /> 
       <Stack.Screen name="Protection" component={ProtectionScreen} />
       <Stack.Screen name="Privacy" component={PrivacyPage} />
     </Stack.Navigator>
