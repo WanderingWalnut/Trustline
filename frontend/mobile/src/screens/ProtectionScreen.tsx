@@ -11,8 +11,9 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sx, sy, fs } from '../utils/designScale';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigations/RootNavigator';
 
 const SETTINGS_ICON = require('../../assets/settings.png');
@@ -25,8 +26,10 @@ const STORAGE_ON_KEY = 'protection:isOn';
 const STORAGE_START_KEY = 'protection:startAt';
 
 type Rt = RouteProp<RootStackParamList, 'Protection'>;
+type Nav = StackNavigationProp<RootStackParamList, 'Protection'>;
 
 export default function ProtectionScreen() {
+  const navigation = useNavigation<Nav>();
   const { params } = useRoute<Rt>();
   const firstName = params?.firstName ?? 'User';
   const lastName = params?.lastName ? ` ${params.lastName}` : '';
@@ -118,7 +121,10 @@ export default function ProtectionScreen() {
               <Text style={styles.brand}>Trustline</Text>
               <Text style={styles.subtitle}>Scam call protection</Text>
             </View>
-            <Pressable onPress={() => { /* TODO: navigate to Settings */ }}>
+            <Pressable
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              onPress={() => navigation.navigate('Settings')}
+            >
               <Image source={SETTINGS_ICON} style={styles.settingsIcon} />
             </Pressable>
           </View>
