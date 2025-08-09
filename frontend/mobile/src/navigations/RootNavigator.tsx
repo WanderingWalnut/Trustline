@@ -9,7 +9,7 @@ import LoginCodeScreen from '../screens/LoginCode';
 
 export type RootStackParamList = {
   SplashScreen: undefined;
-  Welcome: undefined;
+  Welcome:  { phone: string };
   Name:  { phone: string };
   Caregiver: { phone: string; firstName: string; lastName?: string }; // 👈 NEW
   Privacy: {
@@ -20,7 +20,7 @@ export type RootStackParamList = {
     phone: string; firstName: string; lastName?: string;
     caregiverFirstName?: string; caregiverLastName?: string; caregiverPhone?: string;
   };
-  LoginCode: { phone: string; firstName: string; lastName?: string };
+  LoginCode: { phone: string };
 
   };
 

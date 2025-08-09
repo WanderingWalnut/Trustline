@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { sx, sy, fs } from '../utils/designScale';
 import type { RootStackParamList } from '../navigations/RootNavigator';
+import { supabase } from '../services/api';
 
 const PROFILE_ICON = require('../../assets/profile.png');
 const SETTINGS_ICON = require('../../assets/settings.png');
@@ -49,16 +50,13 @@ export default function WelcomeScreen() {
 
     // Supabase OTP
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      // You may want to move this to a separate file for reuse
-      const supabase = createClient('https://gkhyhlhiwhujqnpotqvo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdraHlobGhpd2h1anFucG90cXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2OTk2MDIsImV4cCI6MjA3MDI3NTYwMn0.Vgxohdq_Qj2OmOpb0dB-7xFelqIBHppb330POKBdjSc');
       const { error } = await supabase.auth.signInWithOtp({ phone });
       if (error) {
         alert(error.message);
         return;
       }
       // Navigate to OTP entry screen (replace 'Name' with your OTP screen)
-      navigation.navigate('Name', { phone });
+      navigation.navigate('LoginCode', { phone });
     } catch (err) {
       alert('Failed to send OTP');
       console.error(err);

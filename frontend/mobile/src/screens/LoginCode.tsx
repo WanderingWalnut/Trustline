@@ -14,17 +14,22 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 
+
 import colors from '../constants/color';
 import { sx, sy, fs } from '../utils/designScale';
+import { supabase } from '../services/api';
 
 const LOGO = require('../../assets/logo.png');
 
 export default function LoginCodeScreen({ onSubmit }: { onSubmit?: (code: string) => void }) {
   const [digits, setDigits] = React.useState<string[]>(['', '', '', '', '', '']);
   const inputs = React.useRef<Array<TextInput | null>>([]);
-
   const code = digits.join('');
   const isReady = code.length === 6;
+
+  // Get phone number from navigation params
+  const { phone } = (require('@react-navigation/native').useRoute().params ?? {});
+  const navigation = require('@react-navigation/native').useNavigation();
 
   const focusNext = (index: number) => {
     if (index < inputs.current.length - 1) {
@@ -38,8 +43,6 @@ export default function LoginCodeScreen({ onSubmit }: { onSubmit?: (code: string
 
   const handleChange = (text: string, index: number) => {
     const onlyNums = text.replace(/\D/g, '');
-
-    // Support pasting multiple digits at once
     if (onlyNums.length > 1) {
       const next = onlyNums.slice(0, 6).split('');
       const merged = Array.from({ length: 6 }, (_, i) => next[i] ?? digits[i]);
@@ -48,7 +51,6 @@ export default function LoginCodeScreen({ onSubmit }: { onSubmit?: (code: string
       inputs.current[last]?.focus();
       return;
     }
-
     const c = onlyNums;
     const next = [...digits];
     next[index] = c;
@@ -62,9 +64,64 @@ export default function LoginCodeScreen({ onSubmit }: { onSubmit?: (code: string
     }
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (!isReady) return;
-    onSubmit?.(code);
+    if (!phone) {
+      alert('Phone number missing');
+      return;
+    }
+    // Supabase OTP verification
+    const { data, error } = await supabase.auth.verifyOtp({
+      phone,
+      token: code,
+      type: 'sms',
+    });
+    if (error) {
+      alert('OTP verification failed: ' + error.message);
+      return;
+    }
+
+    // Get user info from Supabase session
+    const session = supabase.auth.getSession ? await supabase.auth.getSession() : null;
+    const user = session?.data?.session?.user;
+    const access_token = session?.data?.session?.access_token;
+
+    if (!user || !access_token) {
+      alert('User session not found');
+      return;
+    }
+
+    // Check if user exists in DB
+    const { data: existingUser, error: fetchError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('UUID', user.id)
+      .single();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      alert('Error checking user: ' + fetchError.message);
+      return;
+    }
+
+    if (!existingUser) {
+      // Insert user if not exists
+      const { data: insertData, error: insertError } = await supabase
+        .from('users')
+        .insert([{ UUID: user.id, phone_number: user.phone }]);
+      if (insertError) {
+        alert('Error inserting user: ' + insertError.message);
+        return;
+      }
+      // User inserted successfully, navigate to Name page
+      navigation.navigate('Name', { phone });
+      return;
+    } else {
+      // Fetch first_name and last_name and pass to Protection screen
+      const firstName = existingUser.first_name || '';
+      const lastName = existingUser.last_name || '';
+      navigation.navigate('Protection', { phone, firstName, lastName });
+    }
+
   };
 
   return (
