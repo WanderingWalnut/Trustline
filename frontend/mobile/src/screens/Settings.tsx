@@ -39,7 +39,7 @@ export default function SettingsScreen() {
           </Pressable>
         </View>
 
-        {/* Settings Title */}
+        {/* Title */}
         <Text style={[styles.title, { marginTop: sy(40) }]}>Settings</Text>
 
         {/* Edit Profile */}
@@ -55,9 +55,8 @@ export default function SettingsScreen() {
           </View>
         </Pressable>
 
-        {/* Settings Options */}
+        {/* Options */}
         <View style={[styles.settingsContainer, { marginTop: sy(30) }]}>
-
           {/* Notifications */}
           <View style={styles.settingRow}>
             <Text style={styles.settingText}>Notifications</Text>
@@ -65,38 +64,50 @@ export default function SettingsScreen() {
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
               trackColor={{ false: '#D1D5DB', true: '#1B2CC1' }}
-              thumbColor={'#fff'}
+              thumbColor="#fff"
             />
           </View>
           <View style={styles.separator} />
 
           {/* Privacy Statement */}
-          <Pressable style={styles.settingRow} onPress={() => console.log('Privacy Statement')}>
+          <Pressable
+            style={styles.settingRow}
+            onPress={() => navigation.navigate('Statement')}
+          >
             <Text style={styles.settingText}>Privacy Statement</Text>
           </Pressable>
           <View style={styles.separator} />
 
           {/* Help Center */}
-          <Pressable style={styles.settingRow} onPress={() => console.log('Help Center')}>
+          <Pressable
+            style={styles.settingRow}
+            onPress={() => navigation.navigate('HelpCenter')}
+          >
             <Text style={styles.settingText}>Help Center</Text>
           </Pressable>
           <View style={styles.separator} />
 
           {/* Report Problem */}
-          <Pressable style={styles.settingRow} onPress={() => console.log('Report Problem')}>
+          <Pressable
+            style={styles.settingRow}
+            onPress={() => navigation.navigate('ReportPage')}
+          >
             <Text style={styles.settingText}>Report Problem</Text>
           </Pressable>
         </View>
 
         <View style={{ flex: 1 }} />
 
-        {/* Action Buttons */}
+        {/* Actions */}
         <View style={styles.actionButtons}>
           <Pressable style={styles.logoutButton} onPress={() => console.log('Log out')}>
             <Text style={styles.logoutButtonText}>log out</Text>
           </Pressable>
 
-          <Pressable style={styles.deactivateButton} onPress={() => console.log('Deactivate account')}>
+          <Pressable
+            style={styles.deactivateButton}
+            onPress={() => console.log('Deactivate account')}
+          >
             <Text style={styles.deactivateButtonText}>deactivate account</Text>
           </Pressable>
         </View>
@@ -108,16 +119,9 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: '#F2F2F2',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: sx(20),
-  },
+  root: { flex: 1, backgroundColor: '#F2F2F2' },
+  content: { flex: 1, paddingHorizontal: sx(20) },
 
-  // Header
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -127,21 +131,15 @@ const styles = StyleSheet.create({
   subtitle: { marginTop: sy(4), fontSize: fs(16), color: '#1B2CC1', fontWeight: '500' },
   closeButton: { fontSize: fs(24), color: '#1B2CC1', fontWeight: '300' },
 
-  // Settings Title
   title: { fontSize: fs(32), fontWeight: '600', color: '#0A0A0A', textAlign: 'left' },
 
-  // Profile Section
   profileSection: {
     backgroundColor: '#DADADA',
     borderRadius: sx(25),
     paddingHorizontal: sx(20),
     paddingVertical: sy(16),
   },
-  profileRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: sx(16),
-  },
+  profileRow: { flexDirection: 'row', alignItems: 'center', gap: sx(16) },
   profileIconContainer: {
     width: sx(40),
     height: sx(40),
@@ -150,19 +148,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  profileIcon: {
-    width: sx(20),
-    height: sx(20),
-    resizeMode: 'contain',
-    tintColor: '#fff',
-  },
-  editProfileText: {
-    fontSize: fs(18),
-    color: '#1B2CC1',
-    fontWeight: '500',
-  },
+  profileIcon: { width: sx(20), height: sx(20), resizeMode: 'contain', tintColor: '#fff' },
+  editProfileText: { fontSize: fs(18), color: '#1B2CC1', fontWeight: '500' },
 
-  // Settings Container
   settingsContainer: {
     backgroundColor: '#DADADA',
     borderRadius: sx(25),
@@ -175,21 +163,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: sy(16),
   },
-  settingText: {
-    fontSize: fs(18),
-    color: '#1B2CC1',
-    fontWeight: '500',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#B0B0B0',
-    marginHorizontal: sx(-20),
-  },
+  settingText: { fontSize: fs(18), color: '#1B2CC1', fontWeight: '500' },
+  separator: { height: 1, backgroundColor: '#B0B0B0', marginHorizontal: sx(-20) },
 
-  // Action Buttons
-  actionButtons: {
-    gap: sy(16),
-  },
+  actionButtons: { gap: sy(16) },
   logoutButton: {
     backgroundColor: '#1B2CC1',
     paddingVertical: sy(16),
