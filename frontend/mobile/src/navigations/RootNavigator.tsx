@@ -43,20 +43,18 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="SplashScreen">
-      <>
-        <Stack.Screen name="SplashScreen" component={SplashScreen} />
-        <Stack.Screen name="Welcome" component={WelcomePage} />
-        <Stack.Screen name="Name" component={NamePage} />
-        <Stack.Screen name="Caregiver" component={CaregiverPage} />
-        <Stack.Screen name="Privacy" component={PrivacyPage} />
-        <Stack.Screen name="LoginCode" component={LoginCodeScreen} />
-        <Stack.Screen name="Protection" component={ProtectionScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="HelpCenter" component={HelpCentre} />
-        <Stack.Screen name="Statement" component={Statement} />
-        <Stack.Screen name="ReportPage" component={ReportPage} />
-      </>
+      <Stack.Screen name="SplashScreen" component={SplashScreen} />
+      <Stack.Screen name="Welcome" component={WelcomePage} />
+      <Stack.Screen name="Name" component={NamePage} />
+      <Stack.Screen name="Caregiver" component={CaregiverPage} />
+      <Stack.Screen name="Privacy" component={PrivacyPage} />
+      <Stack.Screen name="LoginCode" component={LoginCodeScreen} />
+      <Stack.Screen name="Protection" component={ProtectionScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="HelpCenter" component={HelpCentre} />
+      <Stack.Screen name="Statement" component={Statement} />
+      <Stack.Screen name="ReportPage" component={ReportPage} />
     </Stack.Navigator>
   );
 }
