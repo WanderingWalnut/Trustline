@@ -10,6 +10,8 @@ from app.services.reality_defender import RealityDefenderService
 
 from app.core.config import settings
 from app.services.google_stt import GoogleSTTStreamer
+from app.services.notifier import notify_scam_call
+
 
 router = APIRouter(tags=["media"])
 
@@ -89,6 +91,10 @@ async def media_ws(ws: WebSocket):
         svc = RealityDefenderService()
         result = await svc.analyze_file(path)
         print("Reality Defender:", {"status": result.get("status"), "score": result.get("score")})
+        
+        # Send SMS if call is Manipulated
+        if (result.get("status" or "").upper() == "MANIPULATED") and settings.FORWARD_TO_NUMBER:
+            notify_scam_call(settings.FORWARD_TO_NUMBER, call_sid, result.get("score"))
 
     def on_transcript(text: str, is_final: bool) -> None:
         nonlocal last_interim

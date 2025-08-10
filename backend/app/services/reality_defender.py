@@ -32,7 +32,7 @@ class RealityDefenderService:
         result = await self._client.get_result(request_id)
         return result
 
-
+# For testing...
 async def main(file_path: str) -> None:
     svc = RealityDefenderService()
     print(f"Submitting file to Reality Defender: {file_path}")
