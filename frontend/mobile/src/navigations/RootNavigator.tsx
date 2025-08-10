@@ -42,7 +42,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="ReportPage">
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="SplashScreen">
       <Stack.Screen name="SplashScreen" component={SplashScreen} />
       <Stack.Screen name="Welcome" component={WelcomePage} />
       <Stack.Screen name="Name" component={NamePage} />
