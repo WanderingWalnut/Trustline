@@ -9,12 +9,14 @@ import {
   Pressable,
   AppState,
 } from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sx, sy, fs } from '../utils/designScale';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../navigations/RootNavigator';
+import axios from 'axios';
 
 const SETTINGS_ICON = require('../../assets/settings.png');
 
@@ -92,6 +94,12 @@ export default function ProtectionScreen() {
       stopTimer();
       await AsyncStorage.multiRemove([STORAGE_ON_KEY, STORAGE_START_KEY]);
       await AsyncStorage.setItem(STORAGE_ON_KEY, 'false');
+      // Send POST to /stop API
+      try {
+        await axios.post('https://0c35d4ccf451.ngrok-free.app/stop');
+      } catch (err) {
+        console.error('Failed to send stop request:', err);
+      }
     } else {
       // turn ON
       const now = Date.now();
@@ -99,6 +107,12 @@ export default function ProtectionScreen() {
       startTimer(now);
       await AsyncStorage.setItem(STORAGE_ON_KEY, 'true');
       await AsyncStorage.setItem(STORAGE_START_KEY, String(now));
+      // Send POST to /start API
+      try {
+        await axios.post('https://0c35d4ccf451.ngrok-free.app/start');
+      } catch (err) {
+        console.error('Failed to send start request:', err);
+      }
     }
   };
 
