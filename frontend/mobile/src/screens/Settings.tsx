@@ -1,3 +1,4 @@
+// src/screens/Settings.tsx
 import * as React from 'react';
 import {
   SafeAreaView,
@@ -8,11 +9,17 @@ import {
   Pressable,
   Switch,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import { sx, sy, fs } from '../utils/designScale';
+import type { RootStackParamList } from '../navigations/RootNavigator';
+
+type Nav = StackNavigationProp<RootStackParamList, 'Settings'>;
 
 const PROFILE_ICON = require('../../assets/profile.png');
 
 export default function SettingsScreen() {
+  const navigation = useNavigation<Nav>();
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
 
   return (
@@ -24,7 +31,10 @@ export default function SettingsScreen() {
             <Text style={styles.brand}>Trustline</Text>
             <Text style={styles.subtitle}>Scam call protection</Text>
           </View>
-          <Pressable onPress={() => console.log('Close')}>
+          <Pressable
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Text style={styles.closeButton}>✕</Text>
           </Pressable>
         </View>
@@ -32,18 +42,22 @@ export default function SettingsScreen() {
         {/* Settings Title */}
         <Text style={[styles.title, { marginTop: sy(40) }]}>Settings</Text>
 
-        {/* Edit Profile Section */}
-        <View style={[styles.profileSection, { marginTop: sy(40) }]}>
+        {/* Edit Profile */}
+        <Pressable
+          style={[styles.profileSection, { marginTop: sy(40) }]}
+          onPress={() => navigation.navigate('Profile')}
+        >
           <View style={styles.profileRow}>
             <View style={styles.profileIconContainer}>
               <Image source={PROFILE_ICON} style={styles.profileIcon} />
             </View>
             <Text style={styles.editProfileText}>Edit Profile</Text>
           </View>
-        </View>
+        </Pressable>
 
         {/* Settings Options */}
         <View style={[styles.settingsContainer, { marginTop: sy(30) }]}>
+
           {/* Notifications */}
           <View style={styles.settingRow}>
             <Text style={styles.settingText}>Notifications</Text>
@@ -111,19 +125,10 @@ const styles = StyleSheet.create({
   },
   brand: { fontSize: fs(18), fontWeight: '700', color: '#0A0A0A' },
   subtitle: { marginTop: sy(4), fontSize: fs(16), color: '#1B2CC1', fontWeight: '500' },
-  closeButton: { 
-    fontSize: fs(24), 
-    color: '#1B2CC1', 
-    fontWeight: '300',
-  },
+  closeButton: { fontSize: fs(24), color: '#1B2CC1', fontWeight: '300' },
 
   // Settings Title
-  title: { 
-    fontSize: fs(32), 
-    fontWeight: '600', 
-    color: '#0A0A0A', 
-    textAlign: 'left' 
-  },
+  title: { fontSize: fs(32), fontWeight: '600', color: '#0A0A0A', textAlign: 'left' },
 
   // Profile Section
   profileSection: {
@@ -191,20 +196,12 @@ const styles = StyleSheet.create({
     borderRadius: sx(25),
     alignItems: 'center',
   },
-  logoutButtonText: { 
-    fontSize: fs(16), 
-    color: '#fff',
-    fontWeight: '600' 
-  },
+  logoutButtonText: { fontSize: fs(16), color: '#fff', fontWeight: '600' },
   deactivateButton: {
     backgroundColor: '#1B2CC1',
     paddingVertical: sy(16),
     borderRadius: sx(25),
     alignItems: 'center',
   },
-  deactivateButtonText: { 
-    fontSize: fs(16), 
-    color: '#fff',
-    fontWeight: '600' 
-  },
+  deactivateButtonText: { fontSize: fs(16), color: '#fff', fontWeight: '600' },
 });
