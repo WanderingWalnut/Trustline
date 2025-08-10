@@ -62,26 +62,26 @@ async def voice_webhook(request: Request):
         # Optional: brief notice for compliance (region-specific)
         vr.append(Say("This call may be monitored and transcribed for demo purposes."))
 
-        # 2) (Optional) Dial your mobile so a phone visibly rings
-        if settings.FORWARD_TO_NUMBER:
-            dial = Dial(caller_id=settings.TWILIO_PHONE_NUMBER)
-            dial.number(settings.FORWARD_TO_NUMBER)
-            vr.append(dial)
-            print(f"TWILIO WEBHOOK: dialing forward_to={settings.FORWARD_TO_NUMBER}")
-        else:
-            # Keep the call open for ~60s if you're not dialing out
-            vr.pause(length=60)
-            print("TWILIO WEBHOOK: no forward number; pausing call for 60s")
+        # During testing, disable forwarding and keep the call open briefly
+        # if settings.FORWARD_TO_NUMBER:
+        #     dial = Dial(caller_id=settings.TWILIO_PHONE_NUMBER)
+        #     dial.number(settings.FORWARD_TO_NUMBER)
+        #     vr.append(dial)
+        #     print(f"TWILIO WEBHOOK: dialing forward_to={settings.FORWARD_TO_NUMBER}")
+        # else:
+        vr.pause(length=60)
+        print("TWILIO WEBHOOK: forwarding disabled; pausing call for 60s")
     else:
         # OFF mode: normal flow (no stream)
-        if settings.FORWARD_TO_NUMBER:
-            dial = Dial(caller_id=settings.TWILIO_PHONE_NUMBER)
-            dial.number(settings.FORWARD_TO_NUMBER)
-            vr.append(dial)
-            print(f"TWILIO WEBHOOK: detection OFF; dialing forward_to={settings.FORWARD_TO_NUMBER}")
-        else:
-            vr.append(Say("Streaming is currently disabled."))
-            print("TWILIO WEBHOOK: detection OFF; informing caller that streaming is disabled")
+        # Forwarding disabled during testing as well
+        # if settings.FORWARD_TO_NUMBER:
+        #     dial = Dial(caller_id=settings.TWILIO_PHONE_NUMBER)
+        #     dial.number(settings.FORWARD_TO_NUMBER)
+        #     vr.append(dial)
+        #     print(f"TWILIO WEBHOOK: detection OFF; dialing forward_to={settings.FORWARD_TO_NUMBER}")
+        # else:
+        vr.append(Say("Streaming is currently disabled."))
+        print("TWILIO WEBHOOK: detection OFF; informing caller that streaming is disabled")
 
     # Return as XML
     twiml = str(vr)

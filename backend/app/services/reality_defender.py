@@ -1,9 +1,11 @@
 from typing import Any, Dict, Optional
 import asyncio
 import sys
+import os
 
 from app.core.config import settings
 from realitydefender import RealityDefender
+from app.services.notifier import notify_detection_result
 
 
 class RealityDefenderService:
@@ -51,6 +53,16 @@ async def main(file_path: str) -> None:
             m_status = m.get("status")
             m_score = m.get("score")
             print(f"  - {name}: {m_status} (score={m_score})")
+
+    # Also send an SMS notification (if destination number configured)
+    if settings.FORWARD_TO_NUMBER:
+        pseudo_call_sid = f"LOCAL_TEST"
+        notify_detection_result(
+            to_number=settings.FORWARD_TO_NUMBER,
+            call_sid=pseudo_call_sid,
+            status=status or "",
+            score=score,
+        )
 
 
 if __name__ == "__main__":
