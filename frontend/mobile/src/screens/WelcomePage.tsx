@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { sx, sy, fs } from '../utils/designScale';
 import type { RootStackParamList } from '../navigations/RootNavigator';
+import { supabase } from '../services/api';
 
 const PROFILE_ICON = require('../../assets/profile.png');
 const SETTINGS_ICON = require('../../assets/settings.png');
@@ -37,8 +38,8 @@ export default function WelcomeScreen() {
     Keyboard.dismiss();
   };
 
-  // CHANGES: normalize, validate, then navigate with params
-  const goNext = () => {
+  // Supabase Auth OTP flow
+  const goNext = async () => {
     dismiss();
     const digits = phoneNumber.replace(/\D/g, ''); // keep only 0-9
     if (digits.length !== 10) {
@@ -46,7 +47,20 @@ export default function WelcomeScreen() {
       return;
     }
     const phone = `+1${digits}`; // E.164 style for Canada/US
-    navigation.navigate('Name', { phone });
+
+    // Supabase OTP
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ phone });
+      if (error) {
+        alert(error.message);
+        return;
+      }
+      // Navigate to OTP entry screen (replace 'Name' with your OTP screen)
+      navigation.navigate('LoginCode', { phone });
+    } catch (err) {
+      alert('Failed to send OTP');
+      console.error(err);
+    }
   };
 
   return (

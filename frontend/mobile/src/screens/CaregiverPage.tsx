@@ -17,8 +17,10 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
+
 import type { RootStackParamList } from '../navigations/RootNavigator';
 import { sx, sy, fs } from '../utils/designScale';
+import { supabase } from '../services/api';
 
 const LOGO = require('../../assets/logo.png');
 const CANADA_FLAG = require('../../assets/flag.png');
@@ -39,15 +41,39 @@ export default function CaregiverPage() {
 
   const dismiss = () => Keyboard.dismiss();
 
-  const goNext = () => {
+  const goNext = async () => {
     dismiss();
     const digits = cgPhone.replace(/\D/g, '');
+    const caregiverPhone = digits ? `+1${digits}` : undefined;
+    const caregiverName = cgFirst.trim();
+    if (!caregiverName || !caregiverPhone) {
+      alert('Please enter caregiver name and phone number');
+      return;
+    }
+
+    // Get user info from Supabase session
+    const session = supabase.auth.getSession ? await supabase.auth.getSession() : null;
+    const user = session?.data?.session?.user;
+    if (!user) {
+      alert('User session not found');
+      return;
+    }
+
+    // Insert caregiver info into care_givers table
+    const { error: insertError } = await supabase
+      .from('care_givers')
+      .insert([{ user_id: user.id, name: caregiverName, phone_number: caregiverPhone }]);
+    if (insertError) {
+      alert('Error adding caregiver: ' + insertError.message);
+      return;
+    }
+
     navigation.navigate('Privacy', {
       phone: params.phone,
       firstName: params.firstName,
       lastName: params.lastName,
-      caregiverFirstName: cgFirst.trim() || undefined,
-      caregiverPhone: digits ? `+1${digits}` : undefined,
+      caregiverFirstName: caregiverName,
+      caregiverPhone,
     });
   };
 

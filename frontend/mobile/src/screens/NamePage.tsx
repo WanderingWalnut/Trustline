@@ -17,8 +17,10 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
+
 import type { RootStackParamList } from '../navigations/RootNavigator';
 import { sx, sy, fs } from '../utils/designScale';
+import { supabase } from '../services/api';
 
 const PROFILE_ICON = require('../../assets/profile.png');
 const SETTINGS_ICON = require('../../assets/settings.png');
@@ -40,12 +42,31 @@ export default function NamePage() {
 
   const dismiss = () => Keyboard.dismiss();
 
-  const goNext = () => {
+  const goNext = async () => {
     dismiss();
     if (!firstName.trim()) {
       alert('Please enter your first name');
       return;
     }
+
+    // Get user info from Supabase session
+    const session = supabase.auth.getSession ? await supabase.auth.getSession() : null;
+    const user = session?.data?.session?.user;
+    if (!user) {
+      alert('User session not found');
+      return;
+    }
+
+    // Update user first and last name in DB
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ first_name: firstName.trim(), last_name: lastName.trim() })
+      .eq('UUID', user.id);
+    if (updateError) {
+      alert('Error updating name: ' + updateError.message);
+      return;
+    }
+
     navigation.navigate('Caregiver', {
       phone,
       firstName: firstName.trim(),
