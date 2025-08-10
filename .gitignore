@@ -118,3 +118,7 @@ natiginite-*.json
 
 # Specific service account files
 natiginite-468502-a939ca6ad8e1.json
+
+# Audio captures (generated during testing)
+*.mp3
+*.wav

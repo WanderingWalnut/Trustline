@@ -11,6 +11,7 @@ class Settings:
     TWILIO_API_KEY_SID: str = os.getenv("TWILIO_API_KEY_SID", "")
     TWILIO_API_KEY_SECRET: str = os.getenv("TWILIO_API_KEY_SECRET", "")
     TWILIO_PHONE_NUMBER: str = os.getenv("TWILIO_PHONE_NUMBER", "")
+    FORWARD_TO_NUMBER: str = os.getenv("FORWARD_TO_NUMBER")
     
     # Google Configuration
     GOOGLE_APPLICATION_CREDENTIALS: str = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
@@ -22,6 +23,12 @@ class Settings:
     
     # Detection Service Control
     DETECTION_ENABLED: bool = os.getenv("DETECTION_ENABLED", "false").lower() == "true"
+
+    # Reality Defender
+    REALITY_DEFENDER_API_KEY: str = os.getenv("REALITY_DEFENDER_API_KEY", "")
+
+    # Directory for saved audio files
+    CAPTURE_DIR: str = os.getenv("CAPTURE_DIR", "/tmp")
     
     @classmethod
     def validate_twilio_config(cls) -> bool:
