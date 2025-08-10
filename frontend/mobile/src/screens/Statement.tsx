@@ -8,16 +8,23 @@ import {
   Pressable,
   ScrollView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import { sx, sy, fs } from '../utils/designScale';
+import type { RootStackParamList } from '../navigations/RootNavigator';
+
+type Nav = StackNavigationProp<RootStackParamList, 'Statement'>;
 
 const LOGO = require('../../assets/logo.png');
 
 export default function PrivacyStatementScreen() {
+  const navigation = useNavigation<Nav>();
+
   return (
     <SafeAreaView style={styles.root}>
       <ScrollView contentContainerStyle={styles.content}>
         {/* Back Button */}
-        <Pressable style={[styles.backButton, { marginTop: sy(36) }]} onPress={() => console.log('Back to settings')}>
+        <Pressable style={[styles.backButton, { marginTop: sy(36) }]} onPress={() => navigation.navigate('Settings')}>
           <Text style={styles.backText}>← back to settings</Text>
         </Pressable>
 
