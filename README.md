@@ -48,5 +48,3 @@ Behind the scenes, our detection engine monitors call audio for suspicious patte
 - [Vonage API](https://developer.vonage.com/)  
 
 ---
-
-## 🚀 Try it out  
